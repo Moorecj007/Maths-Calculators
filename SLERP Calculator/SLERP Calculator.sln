@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SLERP Calculator", "SLERP Calculator\SLERP Calculator.vcxproj", "{71B6B86D-B70F-4F76-9FC2-AD8E332AA288}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{71B6B86D-B70F-4F76-9FC2-AD8E332AA288}.Debug|Win32.ActiveCfg = Debug|Win32
+		{71B6B86D-B70F-4F76-9FC2-AD8E332AA288}.Debug|Win32.Build.0 = Debug|Win32
+		{71B6B86D-B70F-4F76-9FC2-AD8E332AA288}.Release|Win32.ActiveCfg = Release|Win32
+		{71B6B86D-B70F-4F76-9FC2-AD8E332AA288}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
