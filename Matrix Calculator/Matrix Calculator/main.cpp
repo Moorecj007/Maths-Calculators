@@ -69,22 +69,62 @@ BOOL CALLBACK DlgProc(HWND _hDlg, UINT _msg, WPARAM _wparam, LPARAM _lparam)
 				break;
 			case (IDC_M_AMULTIPLY):			// A Multiply Button
 				{
-					Multiply(_hDlg, 'a');
+					Scale(_hDlg, 'a');
 				}
 				break;
 			case (IDC_M_BMULTIPLY):			// B Multiply Button
 				{
-					Multiply(_hDlg, 'b');
+					Scale(_hDlg, 'b');
 				}
 				break;
-			case (IDC_M_ATRANSPOSE):			// A Transpose Button
+			case (IDC_M_ATRANSPOSE):		// A Transpose Button
 				{
 					Transpose(_hDlg, 'a');
 				}
 				break;
-			case (IDC_M_BTRANSPOSE):			// B Transpose Button
+			case (IDC_M_BTRANSPOSE):		// B Transpose Button
 				{
 					Transpose(_hDlg, 'b');
+				}
+				break;
+			case (IDC_M_APLUSB):			// A + B Button
+				{
+					Add(_hDlg);
+				}
+				break;
+			case (IDC_M_AMINUSB):			// A - B Button
+				{
+					Subtract(_hDlg);
+				}
+				break;
+			case (IDC_M_ATIMESB):			// A * B Button
+				{
+					Multiply(_hDlg, 'a', 'b');
+				}
+				break;
+			case (IDC_M_BTIMESA):			// B * A Button
+				{
+					Multiply(_hDlg, 'b', 'a');
+				}
+				break;
+			case (IDC_M_ADETERMINANT):		// |A| Button  (Determinant)
+				{
+					Determinant(_hDlg, 'a');
+				}
+				break;
+			case (IDC_M_BDETERMINANT):		// |B| Button  (Determinant)
+				{
+					Determinant(_hDlg, 'b');
+				}
+				break;
+			case (IDC_M_AINVERSE):			// A Inverse Button
+				{
+					Inverse(_hDlg, 'a');
+				}
+				break;
+			case (IDC_M_BINVERSE):			// B Inverse Button
+				{
+					Inverse(_hDlg, 'b');
 				}
 				break;
 

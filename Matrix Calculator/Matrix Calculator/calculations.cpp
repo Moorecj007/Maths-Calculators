@@ -27,7 +27,7 @@ void InitialSetup(HWND _hDlg)
 	string strDefault = FloatToString(fDefault);
 	string strEmpty = "";
 	
-	vector<vector<float>*>* pZeroMatrix = CreateBlankMatrix();
+	vector<vector<float>*>* pZeroMatrix = CreateZeroMatrix(4);
 
 	// Set all values in the matrix to the default value
 	for( int i = 0; i < 4; i++)
@@ -79,7 +79,7 @@ void InitialSetup(HWND _hDlg)
 ********************/
 void MakeIdentity( HWND _hDlg, const char _kcMatrixChar)
 {
-	vector<vector<float>*>* pMatrix = CreateBlankMatrix();
+	vector<vector<float>*>* pMatrix = CreateZeroMatrix(4);
 
 	for( int iRow = 0; iRow < 4; iRow++)
 	{
@@ -104,13 +104,13 @@ void MakeIdentity( HWND _hDlg, const char _kcMatrixChar)
 }
 
 /***********************
-* Multiply: Multiplies the corresponding Matrix by a scalar taken from dialog box
+* Scale: Scales the corresponding Matrix by a scalar taken from dialog box
 * @author: Callan Moore
 * @parameter: _hDlg: Handle to the Dialog Box
 * @parameter: _kcMatrixChar: The corresponding char for the matrix you want to Multiply
 * @return: void
 ********************/
-void Multiply( HWND _hDlg, const char _kcMatrixChar)
+void Scale( HWND _hDlg, const char _kcMatrixChar)
 {
 	// Get the Scalar Value from the Dialog Box
 	wchar_t wstrTemp[100]; // Declare a temp Wide Char string to take LPTSTR from Edit Controls for conversion
@@ -139,7 +139,7 @@ void Multiply( HWND _hDlg, const char _kcMatrixChar)
 	float fScalar = WideStringToFloat(wstrTemp);
 
 	// Create a Matrix and retrieve the values from the Dialog Box
-	vector<vector<float>*>* pMatrix = CreateBlankMatrix();
+	vector<vector<float>*>* pMatrix = CreateZeroMatrix(4);
 	if( RetrieveMatrix( _hDlg, _kcMatrixChar, pMatrix))
 	{
 		for( int iRow = 0; iRow < 4; iRow++)
@@ -151,6 +151,9 @@ void Multiply( HWND _hDlg, const char _kcMatrixChar)
 		}
 		SetMatrix( _hDlg, _kcMatrixChar, pMatrix);
 	}
+
+	// Delete the allocated memory for the matrices
+	DeleteMatrix(pMatrix);
 }
 
 /***********************
@@ -163,22 +166,411 @@ void Multiply( HWND _hDlg, const char _kcMatrixChar)
 void Transpose( HWND _hDlg, const char _kcMatrixChar)
 {
 	// Create a Matrix and retrieve the values from the Dialog Box
-	vector<vector<float>*>* pNewMatrix = CreateBlankMatrix();
-	vector<vector<float>*>* pOldMatrix = CreateBlankMatrix();
+	vector<vector<float>*>* pNewMatrix = CreateZeroMatrix(4);
+	vector<vector<float>*>* pOldMatrix = CreateZeroMatrix(4);
+
 	if( RetrieveMatrix( _hDlg, _kcMatrixChar, pOldMatrix))
 	{
 		for( int iRow = 0; iRow < 4; iRow++)
 		{
 			for( int iColumn = 0; iColumn < 4; iColumn++)
 			{
-				
+				(*(*pNewMatrix)[iRow])[iColumn] = (*(*pOldMatrix)[iColumn])[iRow];
 			}
 		}
 		SetMatrix( _hDlg, _kcMatrixChar, pNewMatrix);
 	}
+
+	// Delete the allocated memory for the matrices
+	DeleteMatrix(pNewMatrix);
+	DeleteMatrix(pOldMatrix);
 }
 
+/***********************
+* Add: Adds Matrix A and B together storing the result in Resultant Matrix
+* @author: Callan Moore
+* @parameter: _hDlg: Handle to the Dialog Box
+* @return: void
+********************/
+void Add( HWND _hDlg)
+{
+	// Create Blank Matrices
+	vector<vector<float>*>* pMatrixA = CreateZeroMatrix(4);
+	vector<vector<float>*>* pMatrixB = CreateZeroMatrix(4);
+	vector<vector<float>*>* pMatrixResult = CreateZeroMatrix(4);
 
+	if(		RetrieveMatrix( _hDlg, 'a', pMatrixA)
+		 && RetrieveMatrix( _hDlg, 'b', pMatrixB) )
+	{
+		for( int iRow = 0; iRow < 4; iRow++)
+		{
+			for( int iColumn = 0; iColumn < 4; iColumn++)
+			{
+				// Simple entry wise addition
+				(*(*pMatrixResult)[iRow])[iColumn] = (*(*pMatrixA)[iRow])[iColumn] + (*(*pMatrixB)[iRow])[iColumn];
+			}
+		}
+
+		SetMatrix( _hDlg, 'c', pMatrixResult);
+	}
+
+	// Delete the allocated memory for the matrices
+	DeleteMatrix(pMatrixA);
+	DeleteMatrix(pMatrixB);
+	DeleteMatrix(pMatrixResult);
+}
+
+/***********************
+* Subtract: Subtracts Matrix B from A storing the result in Resultant Matrix
+* @author: Callan Moore
+* @parameter: _hDlg: Handle to the Dialog Box
+* @return: void
+********************/
+void Subtract( HWND _hDlg)
+{
+	// Create Blank Matrices
+	vector<vector<float>*>* pMatrixA = CreateZeroMatrix(4);
+	vector<vector<float>*>* pMatrixB = CreateZeroMatrix(4);
+	vector<vector<float>*>* pMatrixResult = CreateZeroMatrix(4);
+
+	if(		RetrieveMatrix( _hDlg, 'a', pMatrixA)
+		 && RetrieveMatrix( _hDlg, 'b', pMatrixB) )
+	{
+		for( int iRow = 0; iRow < 4; iRow++)
+		{
+			for( int iColumn = 0; iColumn < 4; iColumn++)
+			{
+				// Simple entry wise subtraction
+				(*(*pMatrixResult)[iRow])[iColumn] = (*(*pMatrixA)[iRow])[iColumn] - (*(*pMatrixB)[iRow])[iColumn];
+			}
+		}
+
+		SetMatrix( _hDlg, 'c', pMatrixResult);
+	}
+
+	// Delete the allocated memory for the matrices
+	DeleteMatrix(pMatrixA);
+	DeleteMatrix(pMatrixB);
+	DeleteMatrix(pMatrixResult);
+}
+
+/***********************
+* Multiply: Multiplies the two matrices in the input order using Column Major
+* @author: Callan Moore
+* @parameter: _hDlg: Handle to the Dialog Box
+* @parameter: _kcMatrixChar1: Char corresponding to the first Matrix
+* @parameter: _kcMatrixChar2: Char corresponding to the second Matrix
+* @return: void
+********************/
+void Multiply( HWND _hDlg, const char _kcMatrixChar1, const char _kcMatrixChar2)
+{
+	// Create Blank Matrices
+	vector<vector<float>*>* pMatrix1 = CreateZeroMatrix(4);
+	vector<vector<float>*>* pMatrix2 = CreateZeroMatrix(4);
+	vector<vector<float>*>* pMatrixResult = CreateZeroMatrix(4);
+
+	float fCurrentCalculation;
+
+	if(		RetrieveMatrix( _hDlg, _kcMatrixChar1, pMatrix1)
+		 && RetrieveMatrix( _hDlg, _kcMatrixChar2, pMatrix2) )
+	{
+		for( int iRow = 0; iRow < 4; iRow++)
+		{
+			for( int iColumn = 0; iColumn < 4; iColumn++)
+			{
+				fCurrentCalculation = 0; // Reset variable to zero each time
+
+				// Repeat 4 times
+				for( int i = 0; i < 4; i++)
+				{
+					// Go across the first column and down the second column multiplying and adding the result together
+					fCurrentCalculation += (*(*pMatrix1)[iRow])[i] * (*(*pMatrix2)[i])[iColumn];
+				}
+
+				// Store the final result for each matrix entry
+				(*(*pMatrixResult)[iRow])[iColumn] = fCurrentCalculation;
+			}
+		}
+
+		SetMatrix( _hDlg, 'c', pMatrixResult);
+	}
+
+	// Delete the allocated memory for the matrices
+	DeleteMatrix(pMatrix1);
+	DeleteMatrix(pMatrix2);
+	DeleteMatrix(pMatrixResult);
+}
+
+/***********************
+* Determinant: Starting function for calculating the determinant of a matrix 
+* @author: Callan Moore
+* @parameter: _hDlg: Handle to the Dialog Box
+* @parameter: _kcMatrixChar: Char corresponding to the matrix you want the determinant of
+* @return: float: The determinant of the matrix
+********************/
+float Determinant( HWND _hDlg, const char _kcMatrixChar)
+{
+	// Create Blank Matrix
+	vector<vector<float>*>* pMatrix = CreateZeroMatrix(4);
+	float fDet = 0;
+
+	if( RetrieveMatrix( _hDlg, _kcMatrixChar, pMatrix) )
+	{
+		fDet = Determinant(pMatrix, 4);
+	}
+
+	// Set the Edit Control to show the Determinant
+	string strDet = FloatToString(fDet);
+	switch(_kcMatrixChar)
+	{
+	case ('a'):
+		{
+			SetDlgItemTextA( _hDlg, IDC_M_ADETERMINANTNUM, strDet.c_str());
+		}
+		break;
+	case ('b'):
+		{
+			SetDlgItemTextA( _hDlg, IDC_M_BDETERMINANTNUM, strDet.c_str());
+		}
+		break;
+	default: break;
+	} // End Switch
+
+	// Delete the allocated memory for the matrices
+	DeleteMatrix(pMatrix);
+
+	return fDet;
+}
+
+/***********************
+* Determinant: Rescursion part of calculating the determinant of a matrix
+* @author: Callan Moore
+* @parameter: _pMatrix: The matrix to find the determinant of
+* @parameter: _iMatrixSize: The size of the matrix
+* @return: float: The determinant of the input matrix
+********************/
+float Determinant( vector<vector<float>*>* _pMatrix, int _iMatrixSize)
+{
+	float fDet = 0;
+
+	// Base case - Smallest derterminant calc is 2x2 matrix
+	if( _iMatrixSize == 2)
+	{
+		fDet = ( (*(*_pMatrix)[0])[0] * (*(*_pMatrix)[1])[1] ) - ( (*(*_pMatrix)[1])[0] * (*(*_pMatrix)[0])[1] );
+		return fDet;
+	}
+	// Breaking the matrix into smaller square matrices
+	else
+	{
+		// Create a smaller square matrix
+		vector<vector<float>*>* pSmallerMatrix = CreateZeroMatrix(_iMatrixSize - 1);
+		int iSmallerRow, iSmallerColumn;
+		
+		for( int iScalar = 0; iScalar < _iMatrixSize; iScalar++)
+		{
+			iSmallerRow = 0;	// Reset Row count
+			// Skipping top line as that is the scaler for the smaller matrix determinant
+			for( int iRow = 1; iRow < _iMatrixSize; iRow++)
+			{
+				iSmallerColumn = 0;	// Reset Column count
+
+				for( int iColumn = 0; iColumn < _iMatrixSize; iColumn++)
+				{
+					// Skipping the column that scalar is in
+					if( iColumn == iScalar)
+					{
+						continue;
+					}
+					else
+					{
+						// Place the values into the smaller matrix ( without the scalars cross)
+						(*(*pSmallerMatrix)[iSmallerRow])[iSmallerColumn] = (*(*_pMatrix)[iRow])[iColumn];
+					}
+					iSmallerColumn++;	// Increment the smaller column also
+				}
+				iSmallerRow++;			// Increment the smaller row also
+			}
+			
+			// Multiply every second Scalar by negative 1 ( every second value needs to be subtracted)
+			if( iScalar % 2 == 0)
+			{
+				// Multiply the Scalar by its determinant ( Recursion)
+				fDet += (*(*_pMatrix)[0])[iScalar] * Determinant(pSmallerMatrix, _iMatrixSize - 1);
+			}
+			else
+			{
+				// Multiply the Scalar by its determinant ( Recursion)
+				fDet += (-1) * (*(*_pMatrix)[0])[iScalar] * Determinant(pSmallerMatrix, _iMatrixSize - 1);
+			}
+		}
+		// Delete the allocated memory for the matrices
+		DeleteMatrix(pSmallerMatrix);
+	}
+
+	
+
+	return fDet;
+}
+
+/***********************
+* Inverse: Calculates the inverse if the Matrix
+* @author: Callan Moore
+* @parameter: _hDlg: Handle to the Dialog Box
+* @parameter: _kcMatrixChar: Char corresponding to the matrix you want the Inverse of
+* @return: void
+********************/
+void Inverse( HWND _hDlg, const char _kcMatrixChar)
+{
+	// Calculate the determinant
+	float fDet = Determinant( _hDlg, _kcMatrixChar);
+	int iScalarRow, iScalarColumn;
+
+	// If determinant is 0 then the matrix is not invertible
+	if( fDet != 0)
+	{
+		// Create Blank Matrix
+		vector<vector<float>*>* pMatrix = CreateZeroMatrix(4);
+		vector<vector<float>*>* pMatrixMinors = CreateZeroMatrix(4);
+		vector<vector<float>*>* pMatrix3x3 = CreateZeroMatrix(3);
+		vector<vector<float>*>* pMatrixAdjugate = CreateZeroMatrix(4);
+		vector<vector<float>*>* pMatrixInverse = CreateZeroMatrix(4);
+		vector<vector<float>*>* pMatrixCofactor;
+
+		if( RetrieveMatrix( _hDlg, _kcMatrixChar, pMatrix))
+		{
+			iScalarRow = 0;	
+
+			// Create Matrix of Minors ( Determinants of each matrix entry)
+			for( int iRow = 0; iRow < 4; iRow++)
+			{
+				//iScalarColumn = 0;	// Reset Column count
+				for( int iColumn = 0; iColumn < 4; iColumn++)
+				{
+
+					iScalarRow = 0;	// Reset Row count
+						
+					// Creates a 3x3 Matrix to calculate the determinant for the Matrix of Minors
+					for( int iRow3x3 = 0; iRow3x3 < 4; iRow3x3++)
+					{
+						iScalarColumn = 0;	// Reset Column count
+
+						// Skipping the Row that scalar is in
+						if( iRow3x3 == iRow)
+						{
+							continue;
+						}
+
+						for( int iColumn3x3 = 0; iColumn3x3 < 4; iColumn3x3++)
+						{
+							// Skipping the column that scalar is in
+							if( iColumn3x3 == iColumn)
+							{
+								continue;
+							}
+							else
+							{
+								// Place the values into the smaller matrix ( without the scalars cross)
+								(*(*pMatrix3x3)[iScalarRow])[iScalarColumn] = (*(*pMatrix)[iRow3x3])[iColumn3x3];
+							}
+							iScalarColumn++;	// Increment the Scalar column also
+						}
+						iScalarRow++;			// Increment the Scalar row also
+					}
+
+					// Stores the determinant of each Matrix entry into the Matrix of Minors
+					(*(*pMatrixMinors)[iRow])[iColumn] = Determinant( pMatrix3x3, 3);
+				}
+			}
+
+			// Calculate the Cofactor Matrix of the Matrix of Minors
+			pMatrixCofactor = Cofactor(pMatrixMinors);
+
+			// Calculate the Adjugate Matrix from the Cofactor Matrix ( Transpose it)
+			pMatrixAdjugate = Adjugate(pMatrixCofactor);
+
+			// Divide each entry by the determinant to get the Inverse!
+			for( int iRow = 0; iRow < 4; iRow++)
+			{
+				for( int iColumn = 0; iColumn < 4; iColumn++)
+				{
+					(*(*pMatrixInverse)[iRow])[iColumn] = (*(*pMatrixAdjugate)[iRow])[iColumn] / fDet;
+				}
+			}
+
+			// Set the Matrix to its Inverse
+			SetMatrix( _hDlg, _kcMatrixChar, pMatrixInverse);
+		}
+
+		// Delete the allocated memory for the matrices
+		DeleteMatrix(pMatrix);
+		DeleteMatrix(pMatrixMinors);
+		DeleteMatrix(pMatrix3x3);
+		DeleteMatrix(pMatrixCofactor);
+		DeleteMatrix(pMatrixAdjugate);
+		DeleteMatrix(pMatrixInverse);
+	}
+	else
+	{
+		MessageBox( _hDlg, L"Oops - Your Matrix is not invertible", L"OOPS", MB_ICONINFORMATION | MB_OK);
+	}
+}
+
+/***********************
+* Cofactor: Calculate the Cofactor of the input Matrix
+* @author: Callan Moore
+* @parameter: _pfMatrix: Pointer to a Double vector of the Matrix to cofactor
+* @return: vector<vector<float>*>*: Pointer to a matrix that is the cofactor
+********************/
+vector<vector<float>*>* Cofactor( vector<vector<float>*>* _pMatrix)
+{
+	// Create Blank Matrix
+	vector<vector<float>*>* pCofactor = CreateZeroMatrix(_pMatrix->size());
+
+	for( unsigned int iRow = 0; iRow < pCofactor->size(); iRow++)
+	{
+		for( unsigned int iColumn = 0; iColumn < pCofactor->size(); iColumn++)
+		{
+			// If the row number plus column number is even (or the entry is 0) then do no change to the matrix entry
+			if( (iRow + iColumn) % 2 == 0 || (*(*_pMatrix)[iRow])[iColumn] == 0)
+			{
+				(*(*pCofactor)[iRow])[iColumn] = (*(*_pMatrix)[iRow])[iColumn]; 
+			}
+			// If the row number plus column number is even then negate the entry
+			else
+			{
+				(*(*pCofactor)[iRow])[iColumn] = (-1) * (*(*_pMatrix)[iRow])[iColumn]; 
+			}
+		}
+	}
+
+	return pCofactor;
+
+	// Matrix memory allocation is deleted in Inverse function ( calling function)
+}
+
+/***********************
+* Adjugate: Calculate the Adjugate of the input Matrix
+* @author: Callan Moore
+* @parameter: _pfMatrix: Pointer to a Double vector of the Matrix to Adjugate
+* @return: vector<vector<float>*>*: Pointer to a matrix that is the Adjugate
+********************/
+vector<vector<float>*>* Adjugate( vector<vector<float>*>* _pMatrix)
+{
+	// Create Blank Matrix
+	vector<vector<float>*>* pAdjugate = CreateZeroMatrix(_pMatrix->size());
+
+	for( unsigned int iRow = 0; iRow < _pMatrix->size(); iRow++)
+	{
+		for( unsigned int iColumn = 0; iColumn < _pMatrix->size(); iColumn++)
+		{
+			(*(*pAdjugate)[iRow])[iColumn] = (*(*_pMatrix)[iColumn])[iRow];
+		}
+	}
+
+	return pAdjugate;
+
+	// Matrix memory allocation is deleted in Inverse function ( calling function)
+}
 
 /***********************
 * RetrieveMatrix: Retrieves the Matrix that corresponds with the input char
@@ -470,22 +862,23 @@ void SetMatrix( HWND _hDlg, const char _kcMatrixChar, vector<vector<float>*>* _p
 }
 
 /***********************
-* CreateBlankMatrix: Creates a blank 4x4 matrix
+* CreateZeroMatrix: Creates a blank NxN matrix
 * @author: Callan Moore
-* @return: vector<vector<float>*>*: Pointer to a Blank 4x4 Matrix
+* @parameter: _iMatrixSize: The size of the matrix you wish to create
+* @return: vector<vector<float>*>*: Pointer to a Blank NxN Matrix
 ********************/
-vector<vector<float>*>* CreateBlankMatrix()
+vector<vector<float>*>* CreateZeroMatrix(int _iMatrixSize)
 {
 	vector<vector<float>*>* pfMatrix = new vector<vector<float>*>;
 
 	// Creating the Rows
-	for( int i = 0; i < 4; i++)
+	for( int i = 0; i < _iMatrixSize; i++)
 	{
 		vector<float>* pVectTemp = new vector<float>;
 		pfMatrix->push_back(pVectTemp);
 
 		// Creating the Columns
-		for( int j = 0; j < 4; j++)
+		for( int j = 0; j < _iMatrixSize; j++)
 		{
 			(*pfMatrix)[i]->push_back(0);
 		}

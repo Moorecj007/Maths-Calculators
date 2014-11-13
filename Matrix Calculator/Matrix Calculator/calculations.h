@@ -30,13 +30,21 @@ using namespace std;
 void InitialSetup(HWND _hDlg);
 
 void MakeIdentity( HWND _hDlg, const char _kcMatrixChar);
-void Multiply( HWND _hDlg, const char _kcMatrixChar);
+void Scale( HWND _hDlg, const char _kcMatrixChar);
 void Transpose( HWND _hDlg, const char _kcMatrixChar);
+void Add( HWND _hDlg);
+void Subtract( HWND _hDlg);
+void Multiply( HWND _hDlg, const char _kcMatrixChar1, const char _kcMatrixChar2);
+float Determinant( HWND _hDlg, const char _kcMatrixChar);
+float Determinant( vector<vector<float>*>* _pMatrix, int _iMatrixSize);
+void Inverse( HWND _hDlg, const char _kcMatrixChar);
+vector<vector<float>*>* Cofactor( vector<vector<float>*>* _pMatrix);
+vector<vector<float>*>* Adjugate( vector<vector<float>*>* _pMatrix);
 
 bool RetrieveMatrix( HWND _hDlg, const char _kcMatrixChar, vector<vector<float>*>* _pfMatrix);
 void SetMatrix( HWND _hDlg, const char _kcMatrixChar, vector<vector<float>*>* _pfMatrix);
 
-vector<vector<float>*>* CreateBlankMatrix();
+vector<vector<float>*>* CreateZeroMatrix(int _iMatrixSize);
 void DeleteMatrix(vector<vector<float>*>* _pMatrix);
 float WideStringToFloat(const wchar_t* _kwstr);
 string FloatToString(const float _kfValue);
