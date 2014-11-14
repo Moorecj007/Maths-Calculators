@@ -259,6 +259,7 @@ void RowEchelonCheck(HWND _hDlg)
 			{
 				if( bAllowedZeroRow == false)
 				{
+					DeleteMatrix(pMatrix);
 					return; 
 				}
 			}
@@ -323,6 +324,7 @@ void RowEchelonCheck(HWND _hDlg)
 		{
 			// Row Echelon has been found - Dispay Message Box
 			MessageBox( _hDlg, L"You have achieved Reduced Row Echelon form", L"Congratulations", MB_ICONINFORMATION | MB_OK);
+			DeleteMatrix(pMatrix);
 			return; // No need to check for Row Echelon
 		}
 
@@ -353,12 +355,14 @@ void RowEchelonCheck(HWND _hDlg)
 					else
 					{
 						// Matrix can't be Row echelon so print nothing and exit function
+						DeleteMatrix(pMatrix);
 						return;
 					}
 				}
 				else
 				{
 					// Matrix can't be Row echelon so print nothing and exit function
+					DeleteMatrix(pMatrix);
 					return;	
 				}
 			}
@@ -369,6 +373,26 @@ void RowEchelonCheck(HWND _hDlg)
 			MessageBox( _hDlg, L"You have achieved Row Echelon form", L"Congratulations", MB_ICONINFORMATION | MB_OK);
 		}
 	}
+	
+	DeleteMatrix(pMatrix);
+}
+
+/***********************
+* DeleteMatrix: Deletes a Matrix
+* @author: Callan Moore
+* @parameter: vector<vector<float>*>*: Pointer to a matrix to delete
+********************/
+void DeleteMatrix(vector<vector<float>*>* _pMatrix)
+{
+	// Deleting the Rows
+	while( (*_pMatrix).empty() == false )
+	{
+		delete (*_pMatrix).back();
+		(*_pMatrix).back() = 0;
+		(*_pMatrix).pop_back();
+	}
+	delete _pMatrix;
+	_pMatrix = 0;
 }
 
 /***********************
@@ -540,7 +564,9 @@ float WideStringToFloat(const wchar_t* _kwstr)
 	wcstombs_s(&convertedChars, str, stringLength, _kwstr, _TRUNCATE);
 
 	// Return the Float conversion of the string
-	return (stof(str));
+	float fNum = stof(str);
+	delete[] str;
+	return (fNum);
 }
 
 /***********************
@@ -567,7 +593,9 @@ int WideStringToInt(const wchar_t* _kwstr)
 	wcstombs_s(&convertedChars, str, stringLength, _kwstr, _TRUNCATE);
 
 	// Return the Float conversion of the string
-	return (stoi(str));
+	int iNum = stoi(str);
+	delete[] str;
+	return (iNum);
 }
 
 /***********************
@@ -633,6 +661,7 @@ bool ValidateFloat(wchar_t* _wstr)
 			}
 		}
 	}
+	delete[] str;
 	return true;
 }
 
@@ -670,5 +699,6 @@ bool ValidateInt(wchar_t* _wstr)
 			return false;
 		}
 	}
+	delete[] str;
 	return true;
 }

@@ -407,8 +407,6 @@ float Determinant( vector<vector<float>*>* _pMatrix, int _iMatrixSize)
 		DeleteMatrix(pSmallerMatrix);
 	}
 
-	
-
 	return fDet;
 }
 
@@ -432,8 +430,8 @@ void Inverse( HWND _hDlg, const char _kcMatrixChar)
 		vector<vector<float>*>* pMatrix = CreateZeroMatrix(4);
 		vector<vector<float>*>* pMatrixMinors = CreateZeroMatrix(4);
 		vector<vector<float>*>* pMatrix3x3 = CreateZeroMatrix(3);
-		vector<vector<float>*>* pMatrixAdjugate = CreateZeroMatrix(4);
 		vector<vector<float>*>* pMatrixInverse = CreateZeroMatrix(4);
+		vector<vector<float>*>* pMatrixAdjugate;
 		vector<vector<float>*>* pMatrixCofactor;
 
 		if( RetrieveMatrix( _hDlg, _kcMatrixChar, pMatrix))
@@ -603,6 +601,7 @@ bool RetrieveMatrix( HWND _hDlg, const char _kcMatrixChar, vector<vector<float>*
 	wchar_t wstrTemp43[100];
 	wchar_t wstrTemp44[100];
 
+	
 	// Retrieve the text from the correct matrix
 	switch( _kcMatrixChar)
 	{
@@ -897,14 +896,12 @@ void DeleteMatrix(vector<vector<float>*>* _pMatrix)
 	// Deleting the Rows
 	while( (*_pMatrix).empty() == false )
 	{
-
-		// Deleting the Columns
-		while ( ((*_pMatrix).back())->empty() == false)
-		{
-			(*_pMatrix).back()->pop_back();
-		}
+		delete (*_pMatrix).back();
+		(*_pMatrix).back() = 0;
 		(*_pMatrix).pop_back();
 	}
+	delete _pMatrix;
+	_pMatrix = 0;
 }
 
 /***********************
@@ -931,7 +928,9 @@ float WideStringToFloat(const wchar_t* _kwstr)
 	wcstombs_s(&convertedChars, str, stringLength, _kwstr, _TRUNCATE);
 
 	// Return the Float conversion of the string
-	return (stof(str));
+	float fNum = stof(str);
+	delete[] str;
+	return (fNum);
 }
 
 /***********************
@@ -997,5 +996,6 @@ bool ValidateFloat(wchar_t* _wstr)
 			}
 		}
 	}
+	delete[] str;
 	return true;
 }

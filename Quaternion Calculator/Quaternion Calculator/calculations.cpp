@@ -381,15 +381,16 @@ float WideStringToFloat(const wchar_t* _kwstr)
 		return (0);
 	}
 
-	// Create new string with twice as many bytes for protection as a wide char may become two 
-	// bytes when converted to multibytes
+	// Create new string with twice as many bytes for protection
 	char* str = new char[stringLength*2];
 	
 	// Convert the Wide Char into Multibyte string
 	wcstombs_s(&convertedChars, str, stringLength, _kwstr, _TRUNCATE);
 
 	// Return the Float conversion of the string
-	return (stof(str));
+	float fNum = stof(str);
+	delete[] str;
+	return (fNum);
 }
 
 /***********************
@@ -398,7 +399,6 @@ float WideStringToFloat(const wchar_t* _kwstr)
 * @parameter: _kfValue: Constant float variable to be converted
 * @return: string: Input float as a string variable
 ********************/
-
 string FloatToString(const float _kfValue)
 {
 	// Create string stream and write the float into it
@@ -456,5 +456,6 @@ bool ValidateFloat(wchar_t* _wstr)
 			}
 		}
 	}
+	delete[] str;
 	return true;
 }

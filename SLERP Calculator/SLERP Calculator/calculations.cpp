@@ -91,30 +91,13 @@ void SLERP(HWND _hDlg)
 	float fRow2I, fRow2J, fRow2K, fRow2C;
 	float fSlerpI, fSlerpJ, fSlerpK, fSlerpC;
 	// Float variables to store calculation results
-	float fRow1UnitI, fRow1UnitJ, fRow1UnitK, fRow1UnitC;
-	float fRow2UnitI, fRow2UnitJ, fRow2UnitK, fRow2UnitC;
-	float fMagnitude1, fMagnitude2;
 	float fOmega, fSinOmega, fCosOmega, fRow1Scalar, fRow2Scalar;
 
 	if(	RetrieveRow( _hDlg, 'a', fRow1I, fRow1J, fRow1K, fRow1C)
 		&& RetrieveRow( _hDlg, 'b', fRow2I, fRow2J, fRow2K, fRow2C) )
 	{
-		// Calculate the Magnitudes
-		fMagnitude1 = sqrt( pow(fRow1I, 2) +  pow(fRow1J, 2) + pow(fRow1K, 2) + pow(fRow1C, 2));
-		fMagnitude2 = sqrt( pow(fRow2I, 2) +  pow(fRow2J, 2) + pow(fRow2K, 2) + pow(fRow2C, 2));
-
-		// Normalise the two quarternions
-		fRow1UnitI = fRow1I / fMagnitude1;
-		fRow1UnitJ = fRow1J / fMagnitude1;
-		fRow1UnitK = fRow1K / fMagnitude1;
-		fRow1UnitC = fRow1C / fMagnitude1;
-		fRow2UnitI = fRow2I / fMagnitude2;
-		fRow2UnitJ = fRow2J / fMagnitude2;
-		fRow2UnitK = fRow2K / fMagnitude2;
-		fRow2UnitC = fRow2C / fMagnitude2;
-
-		// Use Dot Product to compute the Cosine Angle for the two Normalised Quaternions
-		fCosOmega = (fRow1UnitI * fRow2UnitI) + (fRow1UnitJ * fRow2UnitJ) + (fRow1UnitK * fRow2UnitK) + (fRow1UnitC * fRow2UnitC);
+		// Use Dot Product to compute the Cosine Angle for the two Quaternions
+		fCosOmega = (fRow1I * fRow2I) + (fRow1J * fRow2J) + (fRow1K * fRow2K) + (fRow1C * fRow2C);
 
 		// Dot Product is negative then Negate the second Quaternions to attain the shorter arc
 		if( fCosOmega < 0)
@@ -172,58 +155,55 @@ void ConvertToMatrix( HWND _hDlg, const char _kcRow)
 	if( RetrieveRow( _hDlg, _kcRow, fI, fJ, fK, fC))
 	{
 		// First Row of the Matrix
-		fCurrent = fC;
+		fCurrent = 1 - (2 * pow(fJ, 2)) - (2 * pow(fK, 2));
 		strCurrent = FloatToString(fCurrent);
 		SetDlgItemTextA( _hDlg, IDC_MATRIX_11,strCurrent.c_str()); 
-		fCurrent = fI;
+		fCurrent = ( 2 * fI * fJ) + ( 2 * fC * fK);
 		strCurrent = FloatToString(fCurrent);
 		SetDlgItemTextA( _hDlg, IDC_MATRIX_12,strCurrent.c_str()); 
-		fCurrent = fJ;
+		fCurrent = ( 2 * fI * fK) - ( 2 * fC * fJ);
 		strCurrent = FloatToString(fCurrent);
 		SetDlgItemTextA( _hDlg, IDC_MATRIX_13,strCurrent.c_str()); 
-		fCurrent = fK;
+		fCurrent = 0;
 		strCurrent = FloatToString(fCurrent);
 		SetDlgItemTextA( _hDlg, IDC_MATRIX_14,strCurrent.c_str()); 
 
 		// Second Row of the Matrix
-		fCurrent = (-fI);
+		fCurrent = ( 2 * fI * fJ) - ( 2 * fC * fK);
 		strCurrent = FloatToString(fCurrent);
 		SetDlgItemTextA( _hDlg, IDC_MATRIX_21,strCurrent.c_str()); 
-		fCurrent = fC;
+		fCurrent = 1 - (2 * pow(fI, 2)) - ( 2 * pow(fK, 2));
 		strCurrent = FloatToString(fCurrent);
 		SetDlgItemTextA( _hDlg, IDC_MATRIX_22,strCurrent.c_str()); 
-		fCurrent = (-fK);
+		fCurrent = ( 2 * fJ * fK) + ( 2 * fC * fI);
 		strCurrent = FloatToString(fCurrent);
 		SetDlgItemTextA( _hDlg, IDC_MATRIX_23,strCurrent.c_str()); 
-		fCurrent = fJ;
+		fCurrent = 0;
 		strCurrent = FloatToString(fCurrent);
 		SetDlgItemTextA( _hDlg, IDC_MATRIX_24,strCurrent.c_str()); 
 
 		// Third Row of the Matrix
-		fCurrent = (-fJ);
+		fCurrent = ( 2 * fI * fK) + ( 2 * fC * fJ);
 		strCurrent = FloatToString(fCurrent);
 		SetDlgItemTextA( _hDlg, IDC_MATRIX_31,strCurrent.c_str()); 
-		fCurrent = fK;
+		fCurrent = ( 2 * fJ * fK) - ( 2 * fC * fI);
 		strCurrent = FloatToString(fCurrent);
 		SetDlgItemTextA( _hDlg, IDC_MATRIX_32,strCurrent.c_str()); 
-		fCurrent = fC;
+		fCurrent = 1 - (2 * pow(fI, 2)) - ( 2 * pow(fJ, 2));
 		strCurrent = FloatToString(fCurrent);
 		SetDlgItemTextA( _hDlg, IDC_MATRIX_33,strCurrent.c_str()); 
-		fCurrent = (-fI);
+		fCurrent = 0;
 		strCurrent = FloatToString(fCurrent);
 		SetDlgItemTextA( _hDlg, IDC_MATRIX_34,strCurrent.c_str()); 
 
 		// Forth Row of the Matrix
-		fCurrent = (-fK);
+		fCurrent = 0;
 		strCurrent = FloatToString(fCurrent);
+
 		SetDlgItemTextA( _hDlg, IDC_MATRIX_41,strCurrent.c_str()); 
-		fCurrent = (-fJ);
-		strCurrent = FloatToString(fCurrent);
 		SetDlgItemTextA( _hDlg, IDC_MATRIX_42,strCurrent.c_str()); 
-		fCurrent = fI;
-		strCurrent = FloatToString(fCurrent);
 		SetDlgItemTextA( _hDlg, IDC_MATRIX_43,strCurrent.c_str()); 
-		fCurrent = fC;
+		fCurrent = 1;
 		strCurrent = FloatToString(fCurrent);
 		SetDlgItemTextA( _hDlg, IDC_MATRIX_44,strCurrent.c_str()); 
 	}
@@ -350,7 +330,9 @@ float WideStringToFloat(const wchar_t* _kwstr)
 	wcstombs_s(&convertedChars, str, stringLength, _kwstr, _TRUNCATE);
 
 	// Return the Float conversion of the string
-	return (stof(str));
+	float fNum = stof(str);
+	delete[] str;
+	return (fNum);
 }
 
 /***********************
@@ -416,5 +398,6 @@ bool ValidateFloat(wchar_t* _wstr)
 			}
 		}
 	}
+	delete[] str;
 	return true;
 }

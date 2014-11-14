@@ -18,9 +18,7 @@
 #include <windows.h>		
 #include <windowsx.h>		
 #include <string>
-
 #include <stdlib.h>
-
 #include <sstream>
 
 // Local Includes
@@ -36,6 +34,7 @@ void Add(HWND _hDlg);
 
 void RowEchelonCheck(HWND _hDlg);
 
+void DeleteMatrix(vector<vector<float>*>* _pMatrix);
 bool RetrieveRow(HWND _hDlg, const int _kiRow, float& _rfA, float& _rfB, float& _rfC, float& _rfD);
 void SetRow(HWND _hDlg, const int _kiRow, float& _rfA, float& _rfB, float& _rfC, float& _rfD);
 
