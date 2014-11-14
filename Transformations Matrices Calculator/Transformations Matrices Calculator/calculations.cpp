@@ -23,14 +23,6 @@
 ********************/
 void InitialSetup(HWND _hDlg)
 {
-	// Populate the Combo box with items
-	HWND hCombo = GetDlgItem( _hDlg, IDC_COMBO_SELECTION);
-	SendMessage( hCombo, CB_ADDSTRING, 0, (LPARAM)L"Scale");
-	SendMessage( hCombo, CB_ADDSTRING, 0, (LPARAM)L"Skew");
-	SendMessage( hCombo, CB_ADDSTRING, 0, (LPARAM)L"Translate");
-	SendMessage( hCombo, CB_ADDSTRING, 0, (LPARAM)L"Rotate");
-	SendMessage( hCombo, CB_ADDSTRING, 0, (LPARAM)L"Project");
-
 	float fDefault = 00;	// Choose zero as default starting value
 	string strDefault = FloatToString(fDefault);
 	string strEmpty = "";
@@ -73,31 +65,51 @@ void InitialSetup(HWND _hDlg)
 }
 
 /***********************
-* ScaleColumn: Scales the Matrix in Column Major
+* Scale: Scales the Matrix
 * @author: Callan Moore
 * @parameter: _hDlg: Handle to the Dialog Box
+* @parameter: _kcMatrixChar: constant char that denotes the Matrix you want to scale
 * @return: void
 ********************/
-void ScaleColumn( HWND _hDlg)
+void Scale( HWND _hDlg, const char _kcMatrixChar)
 {
-	// Get the Scalar Value from the Dialog Box
-	wchar_t wstrTemp[100]; // Declare a temp Wide Char string to take LPTSTR from Edit Controls for conversion
-	GetDlgItemText( _hDlg, IDC_SCALE_X, wstrTemp, 100);
+	// Get the Scalar Values from the Dialog Box
+	wchar_t wstrTempX[100];
+	wchar_t wstrTempY[100];
+	wchar_t wstrTempZ[100];
+	GetDlgItemText( _hDlg, IDC_SCALE_X, wstrTempX, 100);
+	GetDlgItemText( _hDlg, IDC_SCALE_Y, wstrTempY, 100);
+	GetDlgItemText( _hDlg, IDC_SCALE_Z, wstrTempZ, 100);
 
-	// Validate that the Matrix scalar is a float
-	if( !ValidateFloat( wstrTemp))
+	// Validate that the Matrix scalars are floats
+	if(		!ValidateFloat( wstrTempX)
+		||	!ValidateFloat( wstrTempY)
+		||	!ValidateFloat( wstrTempZ) )
 	{
-		MessageBox( _hDlg, L"ERROR - Scalars are invalid", L"Error", MB_ICONERROR | MB_OK);
+		if( _kcMatrixChar == 'c')
+		{
+			MessageBox( _hDlg, L"ERROR - COLUMN Major Matrix Scalars are invalid", L"Error", MB_ICONERROR | MB_OK);
+		}
+		else
+		{
+			MessageBox( _hDlg, L"ERROR - ROW Major Matrix Scalars are invalid", L"Error", MB_ICONERROR | MB_OK);
+		}
 		return;
 	}
-	float fScalar = WideStringToFloat(wstrTemp);
+	float fScalar = WideStringToFloat(wstrTempX);
 
 	// Create a Blank Matrices
-	vector<vector<float>*>* pColumnMatrix = CreateZeroMatrix(4);
+	vector<vector<float>*>* pMatrix = CreateZeroMatrix(4);
 	vector<vector<float>*>* pResultMatrix;
 
-	if( RetrieveMatrix( _hDlg, 'c', pColumnMatrix))
+	if( RetrieveMatrix( _hDlg, _kcMatrixChar, pMatrix))
 	{
+		// Transpose Row Major Matrix into Column
+		if( _kcMatrixChar == 'r')
+		{
+			Transpose(pMatrix);
+		}
+
 		// Create a scaling matrix starting with an identity Matrix
 		vector<vector<float>*>* pScalarMatrix = CreateZeroMatrix(4);
 		MakeIdentity( pScalarMatrix);
@@ -110,8 +122,8 @@ void ScaleColumn( HWND _hDlg)
 				{
 					if( iRow == 3)
 					{
-						// Set W component to 1 (Homogenising)
-						(*(*pScalarMatrix)[iRow])[iColumn] = 1;
+						// Homogenising is already done with Identity Matrix
+						continue;
 					}
 					else
 					{
@@ -128,47 +140,78 @@ void ScaleColumn( HWND _hDlg)
 		}
 
 		// Multiply the Scalar matrix by the column Matrix
-		pResultMatrix = MultiplyColumn( pScalarMatrix, pColumnMatrix);
-		SetMatrix( _hDlg, 'c', pResultMatrix);
+		pResultMatrix = Multiply( pScalarMatrix, pMatrix);
+
+		// Transpose back into Row Major
+		if( _kcMatrixChar == 'r')
+		{
+			Transpose(pResultMatrix);
+		}
+
+		SetMatrix( _hDlg, _kcMatrixChar, pResultMatrix);
 
 		// Delete Allocated Matrix memory
 		DeleteMatrix(pScalarMatrix);
+		DeleteMatrix(pResultMatrix);
 	}
 
 	// Delete Allocated Matrix memory
-	DeleteMatrix(pColumnMatrix);
-	DeleteMatrix(pResultMatrix);
+	DeleteMatrix(pMatrix);
+
 }
 
 /***********************
-* ScaleRow: Scales the Matrix in Row Major
+* Skew: Skews the Matrix
 * @author: Callan Moore
 * @parameter: _hDlg: Handle to the Dialog Box
+* @parameter: _kcMatrixChar: constant char that denotes the Matrix you want to skew
 * @return: void
 ********************/
-void ScaleRow( HWND _hDlg)
+void Skew( HWND _hDlg, const char _kcMatrixChar)
 {
-	// Get the Scalar Value from the Dialog Box
-	wchar_t wstrTemp[100]; // Declare a temp Wide Char string to take LPTSTR from Edit Controls for conversion
-	GetDlgItemText( _hDlg, IDC_SCALE_X, wstrTemp, 100);
+	// Get the Scalar Values from the Dialog Box
+	wchar_t wstrTempX[100];
+	wchar_t wstrTempY[100];
+	wchar_t wstrTempZ[100];
+	GetDlgItemText( _hDlg, IDC_SCALE_X, wstrTempX, 100);
+	GetDlgItemText( _hDlg, IDC_SCALE_Y, wstrTempY, 100);
+	GetDlgItemText( _hDlg, IDC_SCALE_Z, wstrTempZ, 100);
 
-	// Validate that the Matrix scalar is a float
-	if( !ValidateFloat( wstrTemp))
+	// Validate that the Matrix scalars are floats
+	if(		!ValidateFloat( wstrTempX)
+		||	!ValidateFloat( wstrTempY)
+		||	!ValidateFloat( wstrTempZ) )
 	{
-		MessageBox( _hDlg, L"ERROR - Scalars are invalid", L"Error", MB_ICONERROR | MB_OK);
+		if( _kcMatrixChar == 'c')
+		{
+			MessageBox( _hDlg, L"ERROR - One or more of your COLUMN Major Matrix Scalars are invalid", L"Error", MB_ICONERROR | MB_OK);
+		}
+		else
+		{
+			MessageBox( _hDlg, L"ERROR - One or more of your ROW Major Matrix Scalars are invalid", L"Error", MB_ICONERROR | MB_OK);
+		}
+		return;
 		return;
 	}
-	float fScalar = WideStringToFloat(wstrTemp);
+	float fScalarX = WideStringToFloat(wstrTempX);
+	float fScalarY = WideStringToFloat(wstrTempY);
+	float fScalarZ = WideStringToFloat(wstrTempZ);
 
 	// Create a Blank Matrices
-	vector<vector<float>*>* pRowMatrix = CreateZeroMatrix(4);
+	vector<vector<float>*>* pMatrix = CreateZeroMatrix(4);
 	vector<vector<float>*>* pResultMatrix;
 
-	if( RetrieveMatrix( _hDlg, 'r', pRowMatrix))
+	if( RetrieveMatrix( _hDlg, _kcMatrixChar, pMatrix))
 	{
+		// Transpose Row Major Matrix into Column
+		if( _kcMatrixChar == 'r')
+		{
+			Transpose(pMatrix);
+		}
+
 		// Create a scaling matrix starting with an identity Matrix
-		vector<vector<float>*>* pScalarMatrix = CreateZeroMatrix(4);
-		MakeIdentity( pScalarMatrix);
+		vector<vector<float>*>* pSkewMatrix = CreateZeroMatrix(4);
+		MakeIdentity( pSkewMatrix);
 
 		for( int iRow = 0; iRow < 4; iRow++)
 		{
@@ -176,36 +219,49 @@ void ScaleRow( HWND _hDlg)
 			{
 				if( iRow == iColumn)
 				{
-					if( iRow == 3)
+					if( iRow == 0)
 					{
-						// Set W component to 1 (Homogenising)
-						(*(*pScalarMatrix)[iRow])[iColumn] = 1;
+						(*(*pSkewMatrix)[iRow])[iColumn] = fScalarX;
+					}
+					else if( iRow == 1)
+					{
+						(*(*pSkewMatrix)[iRow])[iColumn] = fScalarY;
+					}
+					else if( iRow == 2)
+					{
+						(*(*pSkewMatrix)[iRow])[iColumn] = fScalarZ;
 					}
 					else
 					{
-						// Set the Diagonal to the Scalar Value
-						(*(*pScalarMatrix)[iRow])[iColumn] = fScalar;
+						continue;
 					}
 				}
 				else
 				{
 					// Set all other values to zero
-					(*(*pScalarMatrix)[iRow])[iColumn] = 0;
+					(*(*pSkewMatrix)[iRow])[iColumn] = 0;
 				}
 			}
 		}
 
 		// Multiply the Scalar matrix by the column Matrix
-		pResultMatrix = MultiplyRow( pRowMatrix, pScalarMatrix);
-		SetMatrix( _hDlg, 'r', pResultMatrix);
+		pResultMatrix = Multiply( pSkewMatrix, pMatrix);
+
+		// Transpose back into Row Major
+		if( _kcMatrixChar == 'r')
+		{
+			Transpose(pResultMatrix);
+		}
+
+		SetMatrix( _hDlg, _kcMatrixChar, pResultMatrix);
 
 		// Delete Allocated Matrix memory
-		DeleteMatrix(pScalarMatrix);
+		DeleteMatrix(pSkewMatrix);
+		DeleteMatrix(pResultMatrix);
 	}
 
 	// Delete Allocated Matrix memory
-	DeleteMatrix(pRowMatrix);
-	DeleteMatrix(pResultMatrix);
+	DeleteMatrix(pMatrix);
 }
 
 /***********************
@@ -240,7 +296,7 @@ void MakeIdentity( vector<vector<float>*>* _pMatrix)
 * @parameter: pMatrix2: Right Matrix for the multiplication
 * @return: vector<vector<float>*>*: Pointer to the Resultant Matrix
 ********************/
-vector<vector<float>*>* MultiplyColumn( vector<vector<float>*>* pMatrix1, vector<vector<float>*>* pMatrix2)
+vector<vector<float>*>* Multiply( vector<vector<float>*>* pMatrix1, vector<vector<float>*>* pMatrix2)
 {
 	// Create Blank Matrix for the result
 	vector<vector<float>*>* pMatrixResult = CreateZeroMatrix(4);
@@ -270,39 +326,36 @@ vector<vector<float>*>* MultiplyColumn( vector<vector<float>*>* pMatrix1, vector
 }
 
 /***********************
-* MultiplyRow: Multiplies the two matrices in Row Major Format
+* Transpose: Transpose the given matrix
 * @author: Callan Moore
-* @parameter: pMatrix1: Left Matrix for the multiplication
-* @parameter: pMatrix2: Right Matrix for the multiplication
-* @return: vector<vector<float>*>*: Pointer to the Resultant Matrix
+* @parameter: _pfMatrix: Pointer to a Double vector of the Matrix to Transpose
+* @return: void
 ********************/
-vector<vector<float>*>* MultiplyRow( vector<vector<float>*>* pMatrix1, vector<vector<float>*>* pMatrix2)
+void Transpose( vector<vector<float>*>* _pMatrix)
 {
-	// Create Blank Matrix for the result
-	vector<vector<float>*>* pMatrixResult = CreateZeroMatrix(4);
+	// Create Blank Matrix
+	vector<vector<float>*>* pTemp = CreateZeroMatrix(_pMatrix->size());
 
-	float fCurrentCalculation;
-
-	for( int iColumn = 0; iColumn < 4; iColumn++)
+	// Transpose the matrix into a temporary Matrix
+	for( unsigned int iRow = 0; iRow < _pMatrix->size(); iRow++)
 	{
-		for( int iRow = 0; iRow < 4; iRow++)
+		for( unsigned int iColumn = 0; iColumn < _pMatrix->size(); iColumn++)
 		{
-			fCurrentCalculation = 0; // Reset variable to zero each time
-
-			// Repeat 4 times
-			for( int i = 0; i < 4; i++)
-			{
-				// Go across the first column and down the second column multiplying and adding the result together
-				fCurrentCalculation += (*(*pMatrix1)[i])[iColumn] * (*(*pMatrix2)[iRow])[i];
-			}
-
-			// Store the final result for each matrix entry
-			(*(*pMatrixResult)[iRow])[iColumn] = fCurrentCalculation;
+			(*(*pTemp)[iRow])[iColumn] = (*(*_pMatrix)[iColumn])[iRow];
 		}
 	}
 
-	// Delete the allocated memory for the matrices
-	return (pMatrixResult);
+	// Assign each entry from the temp Matrix back into the original Matrix
+	for( unsigned int iRow = 0; iRow < _pMatrix->size(); iRow++)
+	{
+		for( unsigned int iColumn = 0; iColumn < _pMatrix->size(); iColumn++)
+		{
+			(*(*_pMatrix)[iRow])[iColumn] = (*(*pTemp)[iRow])[iColumn];
+		}
+	}
+
+	// Delete allocated memory to Temp Matrix
+	DeleteMatrix(pTemp);
 }
 
 /***********************
@@ -443,7 +496,14 @@ bool RetrieveMatrix( HWND _hDlg, const char _kcMatrixChar, vector<vector<float>*
 	}
 	else
 	{
-		MessageBox( _hDlg, L"ERROR - One or more of your Matrix values is not a number", L"Error", MB_OK);
+		if( _kcMatrixChar == 'c')
+		{
+			MessageBox( _hDlg, L"ERROR - One or more of your COLUMN major Matrix values is not a number", L"Error", MB_OK);
+		}
+		else
+		{
+			MessageBox( _hDlg, L"ERROR - One or more of your ROW Major Matrix values is not a number", L"Error", MB_OK);
+		}
 		return false;
 	}
 
