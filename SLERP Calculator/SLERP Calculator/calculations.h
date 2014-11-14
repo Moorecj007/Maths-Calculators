@@ -7,7 +7,7 @@
 * (c) 2005 - 2014 Media Design School 
 *  
 * File Name : calculations.h 
-* Description : Quarternion calculation declaration file
+* Description : SLERP calculation declaration file
 * Author :	Callan Moore
 * Mail :	Callan.Moore@mediadesign.school.nz 
 */

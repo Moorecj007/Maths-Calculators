@@ -7,7 +7,7 @@
 * (c) 2005 - 2014 Media Design School 
 *  
 * File Name : calculations.cpp 
-* Description : Quarternion calculation function implementation
+* Description : SLERP calculation function implementation
 * Author :	Callan Moore
 * Mail :	Callan.Moore@mediadesign.school.nz 
 */

@@ -7,7 +7,7 @@
 * (c) 2005 - 2014 Media Design School 
 *  
 * File Name : calculations.h 
-* Description : Matrix calculation declaration file
+* Description : Transformations calculation declaration file
 * Author :	Callan Moore
 * Mail :	Callan.Moore@mediadesign.school.nz 
 */
@@ -29,21 +29,15 @@ using namespace std;
 // Prototypes
 void InitialSetup(HWND _hDlg);
 
-void MakeIdentity( HWND _hDlg, const char _kcMatrixChar);
-void Scale( HWND _hDlg, const char _kcMatrixChar);
-void Transpose( HWND _hDlg, const char _kcMatrixChar);
-void Add( HWND _hDlg);
-void Subtract( HWND _hDlg);
-void Multiply( HWND _hDlg, const char _kcMatrixChar1, const char _kcMatrixChar2);
-float Determinant( HWND _hDlg, const char _kcMatrixChar);
-float Determinant( vector<vector<float>*>* _pMatrix, int _iMatrixSize);
-void Inverse( HWND _hDlg, const char _kcMatrixChar);
-vector<vector<float>*>* Cofactor( vector<vector<float>*>* _pMatrix);
-vector<vector<float>*>* Adjugate( vector<vector<float>*>* _pMatrix);
+void ScaleColumn( HWND _hDlg);
+void ScaleRow( HWND _hDlg);
 
+
+void MakeIdentity( vector<vector<float>*>* _pMatrix);
+vector<vector<float>*>* MultiplyColumn( vector<vector<float>*>* pMatrix1, vector<vector<float>*>* pMatrix2);
+vector<vector<float>*>* MultiplyRow( vector<vector<float>*>* pMatrix1, vector<vector<float>*>* pMatrix2);
 bool RetrieveMatrix( HWND _hDlg, const char _kcMatrixChar, vector<vector<float>*>* _pfMatrix);
 void SetMatrix( HWND _hDlg, const char _kcMatrixChar, vector<vector<float>*>* _pfMatrix);
-
 vector<vector<float>*>* CreateZeroMatrix(int _iMatrixSize);
 void DeleteMatrix(vector<vector<float>*>* _pMatrix);
 float WideStringToFloat(const wchar_t* _kwstr);

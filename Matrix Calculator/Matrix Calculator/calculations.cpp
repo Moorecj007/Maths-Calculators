@@ -7,7 +7,7 @@
 * (c) 2005 - 2014 Media Design School 
 *  
 * File Name : calculations.cpp 
-* Description : Quarternion calculation function implementation
+* Description : Matrix calculation function implementation
 * Author :	Callan Moore
 * Mail :	Callan.Moore@mediadesign.school.nz 
 */
@@ -133,7 +133,7 @@ void Scale( HWND _hDlg, const char _kcMatrixChar)
 	// Validate that the Matrix scalar is a float
 	if( !ValidateFloat( wstrTemp))
 	{
-		MessageBox( _hDlg, L"ERROR - T Value is invalid", L"Error", MB_ICONERROR | MB_OK);
+		MessageBox( _hDlg, L"ERROR - Scalar is invalid", L"Error", MB_ICONERROR | MB_OK);
 		return;
 	}
 	float fScalar = WideStringToFloat(wstrTemp);
