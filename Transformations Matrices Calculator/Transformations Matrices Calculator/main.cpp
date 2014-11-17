@@ -24,6 +24,10 @@
 #include "resource.h"
 #include "calculations.h"
 
+// Global Variable
+int g_iRadioRotation;
+int g_iRadioProjection;
+
 // Prototypes
 BOOL CALLBACK DlgProc(HWND _hDlg, UINT _msg, WPARAM _wparam, LPARAM _lparam);
 
@@ -38,6 +42,9 @@ BOOL CALLBACK DlgProc(HWND _hDlg, UINT _msg, WPARAM _wparam, LPARAM _lparam);
 ********************/
 BOOL CALLBACK DlgProc(HWND _hDlg, UINT _msg, WPARAM _wparam, LPARAM _lparam)
 {
+	CheckRadioButton( _hDlg, IDC_ROTATION_X, IDC_ROTATION_Z, g_iRadioRotation);
+	CheckRadioButton( _hDlg, IDC_PROJECTION_X, IDC_PROJECTION_Z, g_iRadioProjection);
+
 	switch(_msg)
 	{
 	case(WM_INITDIALOG):
@@ -51,6 +58,13 @@ BOOL CALLBACK DlgProc(HWND _hDlg, UINT _msg, WPARAM _wparam, LPARAM _lparam)
 			SendMessage( hCombo, CB_ADDSTRING, 0, (LPARAM)L"Translate");
 			SendMessage( hCombo, CB_ADDSTRING, 0, (LPARAM)L"Rotate");
 			SendMessage( hCombo, CB_ADDSTRING, 0, (LPARAM)L"Project");
+
+			// Setup the Radio Selections
+			g_iRadioRotation = IDC_ROTATION_X;
+			CheckRadioButton( _hDlg, IDC_ROTATION_X, IDC_ROTATION_Z, IDC_ROTATION_X);
+			g_iRadioProjection = IDC_PROJECTION_X;
+			CheckRadioButton( _hDlg, IDC_PROJECTION_X, IDC_PROJECTION_Z, IDC_PROJECTION_X);
+
 			return (0);
 		}
 	break;
@@ -60,160 +74,66 @@ BOOL CALLBACK DlgProc(HWND _hDlg, UINT _msg, WPARAM _wparam, LPARAM _lparam)
 			HWND hComboBox = GetDlgItem( _hDlg, IDC_COMBO_SELECTION);
 			int iComboIndex = SendMessage( hComboBox, CB_GETCURSEL, 0, 0);
 
-			if(iComboIndex == 2)
-			{
-				// Scalar Values to change if scale is selected
-				wchar_t strTempX[100];
-				wchar_t strTempY[100];
-				wchar_t strTempZ[100];
-				GetDlgItemText( _hDlg, IDC_SCALE_X, strTempX, 100);
-				GetDlgItemText( _hDlg, IDC_SCALE_Y, strTempY, 100);
-				GetDlgItemText( _hDlg, IDC_SCALE_Z, strTempZ, 100);
-
-				if(		ValidateFloat(strTempX)
-					&&	ValidateFloat(strTempY)
-					&&	ValidateFloat(strTempZ) )
-				{
-
-					float fX = WideStringToFloat(strTempX);
-					float fY = WideStringToFloat(strTempY);
-					float fZ = WideStringToFloat(strTempZ);
-
-					string strX = FloatToString(fX);
-					string strY = FloatToString(fY);
-					string strZ = FloatToString(fZ);
-
-					// While Scale is selected any change in Scale/Skew edit controls will be reflected in all three
-					if( HIWORD(_wparam) == EN_CHANGE && LOWORD(_wparam) == IDC_SCALE_X)
-					{
-						if(fY != fX)
-						{
-							SetDlgItemTextA( _hDlg, IDC_SCALE_Y , strX.c_str()); 
-						}
-						if( fZ != fX)
-						{
-							SetDlgItemTextA( _hDlg, IDC_SCALE_Z , strX.c_str()); 
-						}
-					}
-					else if( HIWORD(_wparam) == EN_CHANGE && LOWORD(_wparam) == IDC_SCALE_Y)
-					{
-						if(fX != fY)
-						{
-							SetDlgItemTextA( _hDlg, IDC_SCALE_X , strY.c_str()); 
-						}
-						if( fZ != fY)
-						{
-							SetDlgItemTextA( _hDlg, IDC_SCALE_Z , strY.c_str()); 
-						}	
-					}
-					else if( HIWORD(_wparam) == EN_CHANGE && LOWORD(_wparam) == IDC_SCALE_Z)
-					{
-						if(fX != fZ)
-						{
-							SetDlgItemTextA( _hDlg, IDC_SCALE_X , strZ.c_str()); 
-						}
-						if( fY != fZ)
-						{
-							SetDlgItemTextA( _hDlg, IDC_SCALE_Y , strZ.c_str()); 
-						}
-					}
-
-					// Change all scale values to the X value when Scale is selected
-					if( HIWORD(_wparam) == CBN_CLOSEUP)
-					{
-						if(fY != fX)
-						{
-							SetDlgItemTextA( _hDlg, IDC_SCALE_Y , strX.c_str()); 
-						}
-						if( fZ != fX)
-						{
-							SetDlgItemTextA( _hDlg, IDC_SCALE_Z , strX.c_str()); 
-						}
-					}
-				}
-				else
-				{
-					MessageBox( _hDlg, L"ERROR - One or more of your Matrix Scalars are invalid", L"Error", MB_ICONERROR | MB_OK);
-				}
-			}
-
 			switch(LOWORD( _wparam))
 			{
 			case (IDC_COMPUTE):				// Compute button to trigger the calculation specified in the drop down combo box
 				{
-					// Computes only if checkbox for matrix is unchecked
-					if( !(SendDlgItemMessage( _hDlg, IDC_HOLD_COLUMN, BM_GETCHECK, 0, 0)) )
+					switch( iComboIndex)
 					{
-						switch( iComboIndex)
+					case (0):
 						{
-						case (0):
-							{
-								//Project(_hDlg, 'c');
-							}
-							break;
-						case (1):
-							{
-								//Rotate(_hDlg, 'c');
-							}
-							break;
-						case (2):
-							{
-								Scale(_hDlg, 'c');
-							}
-							break;
-						case (3):
-							{
-								Skew(_hDlg, 'c');
-							}
-							break;
-						case (4):
-							{
-								//Translate(_hDlg, 'c');
-							}
-							break;
-							default: break;
-						}	// End Switch	
-					}
-
-					// Computes only if checkbox for matrix is unchecked
-					if( !(SendDlgItemMessage( _hDlg, IDC_HOLD_ROW, BM_GETCHECK, 0, 0)) )
-					{
-						switch( iComboIndex)
+							//Project(_hDlg, 'c', g_iRadioProjection);
+							//Project(_hDlg, 'r', g_iRadioProjection);
+						}
+						break;
+					case (1):
 						{
-						case (0):
-							{
-								//Project(_hDlg, 'r');
-							}
-							break;
-						case (1):
-							{
-								//Rotate(_hDlg, 'r');
-							}
-							break;
-						case (2):
-							{
-								Scale(_hDlg, 'r');
-							}
-							break;
-						case (3):
-							{
-								Skew(_hDlg, 'r');
-							}
-							break;
-						case (4):
-							{
-								//Translate(_hDlg, 'r');
-							}
-							break;
-							default: break;
-						}	// End Switch	
-					}	
+							Rotate(_hDlg, 'c', g_iRadioRotation);
+							Rotate(_hDlg, 'r', g_iRadioRotation);
+						}
+						break;
+					case (2):
+						{
+							Scale(_hDlg, 'c');
+							Scale(_hDlg, 'r');
+						}
+						break;
+					case (3):
+						{
+							Skew(_hDlg, 'c');
+							Skew(_hDlg, 'r');
+						}
+						break;
+					case (4):
+						{
+							Translate(_hDlg, 'c');
+							Translate(_hDlg, 'r');
+						}
+						break;
+					default: break;
+					}	// End Switch	
 
 					// No Transformation was selected
 					if( iComboIndex == (-1))
 					{
 						MessageBox( _hDlg, L"ERROR - No Transformation selected", L"Error", MB_ICONSTOP | MB_OK);
 					}
+				}
+				break;
+			case (IDC_ROTATION_X):	// Fall Through
+			case (IDC_ROTATION_Y):	// Fall Through
+			case (IDC_ROTATION_Z):	
+				{
+					g_iRadioRotation = LOWORD(_wparam);
+					CheckRadioButton( _hDlg, IDC_ROTATION_X, IDC_ROTATION_Z, LOWORD( _wparam));
+				}
+				break;
+			case (IDC_PROJECTION_X):	// Fall Through
+			case (IDC_PROJECTION_Y):	// Fall Through
+			case (IDC_PROJECTION_Z):	
+				{
+					g_iRadioProjection = LOWORD(_wparam);
+					CheckRadioButton( _hDlg, IDC_PROJECTION_X, IDC_PROJECTION_Z, LOWORD(_wparam));
 				}
 				break;
 			case (IDC_RESET):				// Reset Button to reset the calculator back to default starting values

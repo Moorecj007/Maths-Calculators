@@ -372,32 +372,22 @@ bool ValidateFloat(wchar_t* _wstr)
 	// Convert the Wide Char into Multibyte string
 	wcstombs_s(&convertedChars, str, stringLength, _wstr, _TRUNCATE);
 
-	bool bFirstDecimal = false;
-	int iStrLength = strlen(str);
+	istringstream iss(str);
 
-	// Checks each character of the string
-	for( int i = 0; i < iStrLength; i++)
+    float fFloat;
+
+	// Using noskipws, concatenate iss into fFloat
+    iss >> noskipws >> fFloat; 
+	
+	// Check no flags were raised to say this is not a float
+	if(iss.eof() && !iss.fail())
 	{
-		if( i == 0)	// First char is allowed to be a '-' for negative numbers
-		{
-			if( !((str[i] == '-') || (isdigit(str[i]))))
-			{
-				return false;
-			}
-		}
-		else if( !isdigit(str[i]))
-		{
-			// String can hold one decimal point
-			if( (str[i] == '.') && (bFirstDecimal == false))
-			{
-				bFirstDecimal = true;
-			}
-			else
-			{
-				return false;
-			}
-		}
+		delete[] str;
+		return (true);
 	}
-	delete[] str;
-	return true;
+	else
+	{
+		delete[] str;
+		return (false);
+	}
 }

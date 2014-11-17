@@ -23,6 +23,10 @@
 
 // Local Includes
 #include "resource.h"
+#include <math.h>
+
+// Macros
+//#define PI 3.1459265
 
 using namespace std;
 
@@ -32,8 +36,8 @@ void InitialSetup(HWND _hDlg);
 void Scale( HWND _hDlg, const char _kcMatrixChar);
 void Skew( HWND _hDlg, const char _kcMatrixChar);
 void Translate( HWND _hDlg, const char _kcMatrixChar);
-void Rotate( HWND _hDlg, const char _kcMatrixChar);
-void Project( HWND _hDlg, const char _kcMatrixChar);
+void Rotate( HWND _hDlg, const char _kcMatrixChar, int _iAxis);
+void Project( HWND _hDlg, const char _kcMatrixChar, int _iAxis);
 
 void MakeIdentity( vector<vector<float>*>* _pMatrix);
 vector<vector<float>*>* Multiply( vector<vector<float>*>* pMatrix1, vector<vector<float>*>* pMatrix2);

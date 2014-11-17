@@ -14,6 +14,7 @@
 
 // This Includes
 #include "calculations.h"
+#include "resource.h"
 
 /***********************
 * InitialSetup: Sets all the Text boxes to default value
@@ -43,20 +44,16 @@ void InitialSetup(HWND _hDlg)
 	SetMatrix( _hDlg, 'c', pZeroMatrix);
 
 	// Set the input Trasfomation boxes to 0
-	SetDlgItemTextA( _hDlg, IDC_SCALE_X ,strDefault.c_str()); 
-	SetDlgItemTextA( _hDlg, IDC_SCALE_Y ,strDefault.c_str()); 
-	SetDlgItemTextA( _hDlg, IDC_SCALE_Z ,strDefault.c_str()); 
+	SetDlgItemTextA( _hDlg, IDC_SKEW_X ,strDefault.c_str()); 
+	SetDlgItemTextA( _hDlg, IDC_SKEW_Y ,strDefault.c_str()); 
+	SetDlgItemTextA( _hDlg, IDC_SKEW_Z ,strDefault.c_str()); 
 	SetDlgItemTextA( _hDlg, IDC_TRANSLATION_X ,strDefault.c_str()); 
 	SetDlgItemTextA( _hDlg, IDC_TRANSLATION_Y ,strDefault.c_str()); 
-	SetDlgItemTextA( _hDlg, IDC_TRANSLATION_Z ,strDefault.c_str()); 
-	SetDlgItemTextA( _hDlg, IDC_ROTATION_X ,strDefault.c_str()); 
-	SetDlgItemTextA( _hDlg, IDC_ROTATION_Y ,strDefault.c_str()); 
-	SetDlgItemTextA( _hDlg, IDC_ROTATION_Z ,strDefault.c_str()); 
+	SetDlgItemTextA( _hDlg, IDC_TRANSLATION_Z ,strDefault.c_str());  
 	SetDlgItemTextA( _hDlg, IDC_ROTATION_ANGLE ,strDefault.c_str()); 
-	SetDlgItemTextA( _hDlg, IDC_PROJECTION_X ,strDefault.c_str()); 
-	SetDlgItemTextA( _hDlg, IDC_PROJECTION_Y ,strDefault.c_str()); 
-	SetDlgItemTextA( _hDlg, IDC_PROJECTION_Z ,strDefault.c_str()); 
 	SetDlgItemTextA( _hDlg, IDC_PROJECTION_DISTANCE ,strDefault.c_str()); 
+
+	// Set up the Radio Button Selections
 
 
 	// Delete allocated memory in Matrix
@@ -74,33 +71,23 @@ void InitialSetup(HWND _hDlg)
 void Scale( HWND _hDlg, const char _kcMatrixChar)
 {
 	// Get the Scalar Values from the Dialog Box
-	wchar_t wstrTempX[100];
-	wchar_t wstrTempY[100];
-	wchar_t wstrTempZ[100];
-	GetDlgItemText( _hDlg, IDC_SCALE_X, wstrTempX, 100);
-	GetDlgItemText( _hDlg, IDC_SCALE_Y, wstrTempY, 100);
-	GetDlgItemText( _hDlg, IDC_SCALE_Z, wstrTempZ, 100);
+	wchar_t wstrTemp[100];
+	GetDlgItemText( _hDlg, IDC_SCALE, wstrTemp, 100);
 
 	// Validate that the Matrix scalars are floats
-	if(		!ValidateFloat( wstrTempX)
-		||	!ValidateFloat( wstrTempY)
-		||	!ValidateFloat( wstrTempZ) )
+	if(		!ValidateFloat( wstrTemp) )
 	{
 		if( _kcMatrixChar == 'c')
 		{
-			MessageBox( _hDlg, L"ERROR - COLUMN Major Matrix Scalars are invalid", L"Error", MB_ICONERROR | MB_OK);
+			MessageBox( _hDlg, L"ERROR - Matrix Scalars are invalid", L"Error", MB_ICONERROR | MB_OK);
 		}
-		else
-		{
-			MessageBox( _hDlg, L"ERROR - ROW Major Matrix Scalars are invalid", L"Error", MB_ICONERROR | MB_OK);
-		}
+
 		return;
 	}
-	float fScalar = WideStringToFloat(wstrTempX);
+	float fScalar = WideStringToFloat(wstrTemp);
 
 	// Create a Blank Matrices
 	vector<vector<float>*>* pMatrix = CreateZeroMatrix(4);
-	vector<vector<float>*>* pResultMatrix;
 
 	if( RetrieveMatrix( _hDlg, _kcMatrixChar, pMatrix))
 	{
@@ -139,20 +126,16 @@ void Scale( HWND _hDlg, const char _kcMatrixChar)
 			}
 		}
 
-		// Multiply the Scalar matrix by the column Matrix
-		pResultMatrix = Multiply( pScalarMatrix, pMatrix);
-
-		// Transpose back into Row Major
+		// Transpose into Row Major
 		if( _kcMatrixChar == 'r')
 		{
-			Transpose(pResultMatrix);
+			Transpose(pScalarMatrix);
 		}
 
-		SetMatrix( _hDlg, _kcMatrixChar, pResultMatrix);
+		SetMatrix( _hDlg, _kcMatrixChar, pScalarMatrix);
 
 		// Delete Allocated Matrix memory
 		DeleteMatrix(pScalarMatrix);
-		DeleteMatrix(pResultMatrix);
 	}
 
 	// Delete Allocated Matrix memory
@@ -169,28 +152,24 @@ void Scale( HWND _hDlg, const char _kcMatrixChar)
 ********************/
 void Skew( HWND _hDlg, const char _kcMatrixChar)
 {
-	// Get the Scalar Values from the Dialog Box
+	// Get the Skewing Values from the Dialog Box
 	wchar_t wstrTempX[100];
 	wchar_t wstrTempY[100];
 	wchar_t wstrTempZ[100];
-	GetDlgItemText( _hDlg, IDC_SCALE_X, wstrTempX, 100);
-	GetDlgItemText( _hDlg, IDC_SCALE_Y, wstrTempY, 100);
-	GetDlgItemText( _hDlg, IDC_SCALE_Z, wstrTempZ, 100);
+	GetDlgItemText( _hDlg, IDC_SKEW_X, wstrTempX, 100);
+	GetDlgItemText( _hDlg, IDC_SKEW_Y, wstrTempY, 100);
+	GetDlgItemText( _hDlg, IDC_SKEW_Z, wstrTempZ, 100);
 
-	// Validate that the Matrix scalars are floats
+	// Validate that the Matrix Skew variables are floats
 	if(		!ValidateFloat( wstrTempX)
 		||	!ValidateFloat( wstrTempY)
 		||	!ValidateFloat( wstrTempZ) )
 	{
 		if( _kcMatrixChar == 'c')
 		{
-			MessageBox( _hDlg, L"ERROR - One or more of your COLUMN Major Matrix Scalars are invalid", L"Error", MB_ICONERROR | MB_OK);
+			MessageBox( _hDlg, L"ERROR - One or more of your Matrix Skewing Values are invalid", L"Error", MB_ICONERROR | MB_OK);
 		}
-		else
-		{
-			MessageBox( _hDlg, L"ERROR - One or more of your ROW Major Matrix Scalars are invalid", L"Error", MB_ICONERROR | MB_OK);
-		}
-		return;
+
 		return;
 	}
 	float fScalarX = WideStringToFloat(wstrTempX);
@@ -199,17 +178,10 @@ void Skew( HWND _hDlg, const char _kcMatrixChar)
 
 	// Create a Blank Matrices
 	vector<vector<float>*>* pMatrix = CreateZeroMatrix(4);
-	vector<vector<float>*>* pResultMatrix;
 
 	if( RetrieveMatrix( _hDlg, _kcMatrixChar, pMatrix))
 	{
-		// Transpose Row Major Matrix into Column
-		if( _kcMatrixChar == 'r')
-		{
-			Transpose(pMatrix);
-		}
-
-		// Create a scaling matrix starting with an identity Matrix
+		// Create a skewing matrix starting with an identity Matrix
 		vector<vector<float>*>* pSkewMatrix = CreateZeroMatrix(4);
 		MakeIdentity( pSkewMatrix);
 
@@ -244,20 +216,158 @@ void Skew( HWND _hDlg, const char _kcMatrixChar)
 			}
 		}
 
-		// Multiply the Scalar matrix by the column Matrix
-		pResultMatrix = Multiply( pSkewMatrix, pMatrix);
+		// Transpose into Row Major
+		if( _kcMatrixChar == 'r')
+		{
+			Transpose(pSkewMatrix);
+		}
+
+		SetMatrix( _hDlg, _kcMatrixChar, pSkewMatrix);
+
+		// Delete Allocated Matrix memory
+		DeleteMatrix(pSkewMatrix);
+	}
+
+	// Delete Allocated Matrix memory
+	DeleteMatrix(pMatrix);
+}
+
+/***********************
+* Translate: Translates the Matrix
+* @author: Callan Moore
+* @parameter: _hDlg: Handle to the Dialog Box
+* @parameter: _kcMatrixChar: constant char that denotes the Matrix you want to translate
+* @return: void
+********************/
+void Translate( HWND _hDlg, const char _kcMatrixChar)
+{
+	// Get the Translation Values from the Dialog Box
+	wchar_t wstrTempX[100];
+	wchar_t wstrTempY[100];
+	wchar_t wstrTempZ[100];
+	GetDlgItemText( _hDlg, IDC_TRANSLATION_X, wstrTempX, 100);
+	GetDlgItemText( _hDlg, IDC_TRANSLATION_Y, wstrTempY, 100);
+	GetDlgItemText( _hDlg, IDC_TRANSLATION_Z, wstrTempZ, 100);
+
+	// Validate that the Matrix Translation values are floats
+	if(		!ValidateFloat( wstrTempX)
+		||	!ValidateFloat( wstrTempY)
+		||	!ValidateFloat( wstrTempZ) )
+	{
+		if( _kcMatrixChar == 'c')
+		{
+			MessageBox( _hDlg, L"ERROR - One or more of your Matrix translate values are invalid", L"Error", MB_ICONERROR | MB_OK);
+		}
+		return;
+	}
+	float fScalarX = WideStringToFloat(wstrTempX);
+	float fScalarY = WideStringToFloat(wstrTempY);
+	float fScalarZ = WideStringToFloat(wstrTempZ);
+
+	// Create a Blank Matrices
+	vector<vector<float>*>* pMatrix = CreateZeroMatrix(4);
+
+	if( RetrieveMatrix( _hDlg, _kcMatrixChar, pMatrix))
+	{
+		// Create a Translation matrix starting with an identity Matrix
+		vector<vector<float>*>* pTranslationMatrix = CreateZeroMatrix(4);
+		MakeIdentity( pTranslationMatrix);
+
+		(*(*pTranslationMatrix)[0])[3] = fScalarX;
+		(*(*pTranslationMatrix)[1])[3] = fScalarY;
+		(*(*pTranslationMatrix)[2])[3] = fScalarZ;
 
 		// Transpose back into Row Major
 		if( _kcMatrixChar == 'r')
 		{
-			Transpose(pResultMatrix);
+			Transpose(pTranslationMatrix);
 		}
 
-		SetMatrix( _hDlg, _kcMatrixChar, pResultMatrix);
+		SetMatrix( _hDlg, _kcMatrixChar, pTranslationMatrix);
 
 		// Delete Allocated Matrix memory
-		DeleteMatrix(pSkewMatrix);
-		DeleteMatrix(pResultMatrix);
+		DeleteMatrix(pTranslationMatrix);
+	}
+
+	// Delete Allocated Matrix memory
+	DeleteMatrix(pMatrix);
+}
+
+/***********************
+* Rotate: Rotates the Matrix
+* @author: Callan Moore
+* @parameter: _hDlg: Handle to the Dialog Box
+* @parameter: _kcMatrixChar: constant char that denotes the Matrix you want to Rotate
+* @parameter: _iAxis: The axis of rotation
+* @return: void
+********************/
+void Rotate( HWND _hDlg, const char _kcMatrixChar, int _iAxis)
+{
+	float fPI = atan(1.0f)*4;
+
+	// Retrieve the Angle of rotation
+	wchar_t wstrTemp[100];
+	GetDlgItemText( _hDlg, IDC_ROTATION_ANGLE, wstrTemp, 100);
+
+	if(	!ValidateFloat( wstrTemp))
+	{
+		MessageBox( _hDlg, L"ERROR - Your Angle of Rotation is invalid", L"Error", MB_ICONERROR | MB_OK);
+		return;
+	}
+	// Take the angle in degrees and convert to radians
+	float fAngle = WideStringToFloat(wstrTemp) * ( fPI / 180);
+
+	// Create a Blank Matrices
+	vector<vector<float>*>* pMatrix = CreateZeroMatrix(4);
+
+	if( RetrieveMatrix( _hDlg, _kcMatrixChar, pMatrix))
+	{
+		// Create a Translation matrix starting with an identity Matrix
+		vector<vector<float>*>* pRotationMatrix = CreateZeroMatrix(4);
+		MakeIdentity( pRotationMatrix);
+
+		switch( _iAxis)
+		{
+		case (IDC_ROTATION_X):
+			{
+				// Rotate around the X axis
+				(*(*pRotationMatrix)[1])[1] = static_cast<float>(floor( cos(fAngle) * 1000.0f + 0.5) / 1000);
+				(*(*pRotationMatrix)[1])[2] = static_cast<float>(floor( sin(fAngle) * 1000.0f + 0.5) / 1000);
+				(*(*pRotationMatrix)[2])[1] = static_cast<float>(floor( ((-1) * sin(fAngle)) * 1000.0f + 0.5) / 1000);
+				(*(*pRotationMatrix)[2])[2] = static_cast<float>(floor( cos(fAngle) * 1000.0f + 0.5) / 1000);
+			}
+			break;
+		case (IDC_ROTATION_Y):
+			{
+				// Rotate around the Y axis
+				(*(*pRotationMatrix)[0])[0] = static_cast<float>(floor( cos(fAngle) * 1000.0f + 0.5) / 1000);
+				(*(*pRotationMatrix)[0])[2] = static_cast<float>(floor( ((-1) * sin(fAngle)) * 1000.0f + 0.5) / 1000);
+				(*(*pRotationMatrix)[2])[0] = static_cast<float>(floor( sin(fAngle) * 1000.0f + 0.5) / 1000);
+				(*(*pRotationMatrix)[2])[2] = static_cast<float>(floor( cos(fAngle) * 1000.0f + 0.5) / 1000);
+			}
+			break;
+		case (IDC_ROTATION_Z):
+			{
+				// Rotate around the Z axis
+				(*(*pRotationMatrix)[0])[0] = static_cast<float>(floor( cos(fAngle) * 1000.0f + 0.5) / 1000);
+				(*(*pRotationMatrix)[0])[1] = static_cast<float>(floor( sin(fAngle) * 1000.0f + 0.5) / 1000);
+				(*(*pRotationMatrix)[1])[0] = static_cast<float>(floor( ((-1) * sin(fAngle)) * 1000.0f + 0.5) / 1000);
+				(*(*pRotationMatrix)[1])[1] = static_cast<float>(floor( cos(fAngle) * 1000.0f + 0.5) / 1000);
+			}
+			break;
+		default: break;
+		}	// End Switch
+
+		// Transpose back into Row Major
+		if( _kcMatrixChar == 'r')
+		{
+			Transpose(pRotationMatrix);
+		}
+
+		SetMatrix( _hDlg, _kcMatrixChar, pRotationMatrix);
+
+		// Delete Allocated Matrix memory
+		DeleteMatrix(pRotationMatrix);
 	}
 
 	// Delete Allocated Matrix memory
@@ -712,32 +822,22 @@ bool ValidateFloat(wchar_t* _wstr)
 	// Convert the Wide Char into Multibyte string
 	wcstombs_s(&convertedChars, str, stringLength, _wstr, _TRUNCATE);
 
-	bool bFirstDecimal = false;
-	int iStrLength = strlen(str);
+	istringstream iss(str);
 
-	// Checks each character of the string
-	for( int i = 0; i < iStrLength; i++)
+    float fFloat;
+
+	// Using noskipws, concatenate iss into fFloat
+    iss >> noskipws >> fFloat; 
+	
+	// Check no flags were raised to say this is not a float
+	if(iss.eof() && !iss.fail())
 	{
-		if( i == 0)	// First char is allowed to be a '-' for negative numbers
-		{
-			if( !((str[i] == '-') || (isdigit(str[i]))))
-			{
-				return false;
-			}
-		}
-		else if( !isdigit(str[i]))
-		{
-			// String can hold one decimal point
-			if( (str[i] == '.') && (bFirstDecimal == false))
-			{
-				bFirstDecimal = true;
-			}
-			else
-			{
-				return false;
-			}
-		}
+		delete[] str;
+		return (true);
 	}
-	delete[] str;
-	return true;
+	else
+	{
+		delete[] str;
+		return (false);
+	}
 }
