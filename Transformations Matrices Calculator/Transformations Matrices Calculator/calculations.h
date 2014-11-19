@@ -33,11 +33,11 @@ using namespace std;
 // Prototypes
 void InitialSetup(HWND _hDlg);
 
-void Scale( HWND _hDlg, const char _kcMatrixChar);
-void Skew( HWND _hDlg, const char _kcMatrixChar);
-void Translate( HWND _hDlg, const char _kcMatrixChar);
-void Rotate( HWND _hDlg, const char _kcMatrixChar, int _iAxis);
-void Project( HWND _hDlg, const char _kcMatrixChar, int _iAxis);
+vector<vector<float>*>* Scale( HWND _hDlg, const char _kcMatrixChar);
+vector<vector<float>*>* Skew( HWND _hDlg, const char _kcMatrixChar);
+vector<vector<float>*>* Translate( HWND _hDlg, const char _kcMatrixChar);
+vector<vector<float>*>* Rotate( HWND _hDlg, const char _kcMatrixChar, int _iAxis);
+vector<vector<float>*>* Project( HWND _hDlg, const char _kcMatrixChar, int _iAxis);
 
 void MakeIdentity( vector<vector<float>*>* _pMatrix);
 vector<vector<float>*>* Multiply( vector<vector<float>*>* pMatrix1, vector<vector<float>*>* pMatrix2);

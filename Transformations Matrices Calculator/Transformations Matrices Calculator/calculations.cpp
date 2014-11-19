@@ -65,82 +65,57 @@ void InitialSetup(HWND _hDlg)
 * Scale: Scales the Matrix
 * @author: Callan Moore
 * @parameter: _hDlg: Handle to the Dialog Box
-* @parameter: _kcMatrixChar: constant char that denotes the Matrix you want to scale
-* @return: void
+* @parameter: _kcMatrixChar: Constant char that denotes the Matrix you want to scale
+* @return: vector<vector<float>*>*: Pointer to the Scaling Matrix
 ********************/
-void Scale( HWND _hDlg, const char _kcMatrixChar)
+vector<vector<float>*>* Scale( HWND _hDlg, const char _kcMatrixChar)
 {
 	// Get the Scalar Values from the Dialog Box
 	wchar_t wstrTemp[100];
 	GetDlgItemText( _hDlg, IDC_SCALE, wstrTemp, 100);
-
-	// Validate that the Matrix scalars are floats
-	if(		!ValidateFloat( wstrTemp) )
-	{
-		if( _kcMatrixChar == 'c')
-		{
-			MessageBox( _hDlg, L"ERROR - Matrix Scalars are invalid", L"Error", MB_ICONERROR | MB_OK);
-		}
-
-		return;
-	}
 	float fScalar = WideStringToFloat(wstrTemp);
 
-	// Create a Blank Matrices
-	vector<vector<float>*>* pMatrix = CreateZeroMatrix(4);
+	// Create a scaling matrix starting with an identity Matrix
+	vector<vector<float>*>* pScalarMatrix = CreateZeroMatrix(4);
+	MakeIdentity( pScalarMatrix);
 
-	if( RetrieveMatrix( _hDlg, _kcMatrixChar, pMatrix))
+	for( int iRow = 0; iRow < 4; iRow++)
 	{
-		// Transpose Row Major Matrix into Column
-		if( _kcMatrixChar == 'r')
+		for( int iColumn = 0; iColumn < 4; iColumn++)
 		{
-			Transpose(pMatrix);
-		}
-
-		// Create a scaling matrix starting with an identity Matrix
-		vector<vector<float>*>* pScalarMatrix = CreateZeroMatrix(4);
-		MakeIdentity( pScalarMatrix);
-
-		for( int iRow = 0; iRow < 4; iRow++)
-		{
-			for( int iColumn = 0; iColumn < 4; iColumn++)
+			if( iRow == iColumn)
 			{
-				if( iRow == iColumn)
+				if( iRow == 3)
 				{
-					if( iRow == 3)
-					{
-						// Homogenising is already done with Identity Matrix
-						continue;
-					}
-					else
-					{
-						// Set the Diagonal to the Scalar Value
-						(*(*pScalarMatrix)[iRow])[iColumn] = fScalar;
-					}
+					// Homogenising is already done with Identity Matrix
+					continue;
 				}
 				else
 				{
-					// Set all other values to zero
-					(*(*pScalarMatrix)[iRow])[iColumn] = 0;
+					// Set the Diagonal to the Scalar Value
+					(*(*pScalarMatrix)[iRow])[iColumn] = fScalar;
 				}
 			}
+			else
+			{
+				// Set all other values to zero
+				(*(*pScalarMatrix)[iRow])[iColumn] = 0;
+			}
 		}
-
-		// Transpose into Row Major
-		if( _kcMatrixChar == 'r')
-		{
-			Transpose(pScalarMatrix);
-		}
-
-		SetMatrix( _hDlg, _kcMatrixChar, pScalarMatrix);
-
-		// Delete Allocated Matrix memory
-		DeleteMatrix(pScalarMatrix);
 	}
 
-	// Delete Allocated Matrix memory
-	DeleteMatrix(pMatrix);
+	return pScalarMatrix;
 
+	//// Transpose into Row Major
+	//if( _kcMatrixChar == 'r')
+	//{
+	//	Transpose(pScalarMatrix);
+	//}
+
+	//SetMatrix( _hDlg, _kcMatrixChar, pScalarMatrix);
+
+	//// Delete Allocated Matrix memory
+	//DeleteMatrix(pScalarMatrix);
 }
 
 /***********************
@@ -148,9 +123,9 @@ void Scale( HWND _hDlg, const char _kcMatrixChar)
 * @author: Callan Moore
 * @parameter: _hDlg: Handle to the Dialog Box
 * @parameter: _kcMatrixChar: constant char that denotes the Matrix you want to skew
-* @return: void
+* @return: vector<vector<float>*>*: Pointer to the Skewing Matrix
 ********************/
-void Skew( HWND _hDlg, const char _kcMatrixChar)
+vector<vector<float>*>* Skew( HWND _hDlg, const char _kcMatrixChar)
 {
 	// Get the Skewing Values from the Dialog Box
 	wchar_t wstrTempX[100];
@@ -160,76 +135,57 @@ void Skew( HWND _hDlg, const char _kcMatrixChar)
 	GetDlgItemText( _hDlg, IDC_SKEW_Y, wstrTempY, 100);
 	GetDlgItemText( _hDlg, IDC_SKEW_Z, wstrTempZ, 100);
 
-	// Validate that the Matrix Skew variables are floats
-	if(		!ValidateFloat( wstrTempX)
-		||	!ValidateFloat( wstrTempY)
-		||	!ValidateFloat( wstrTempZ) )
-	{
-		if( _kcMatrixChar == 'c')
-		{
-			MessageBox( _hDlg, L"ERROR - One or more of your Matrix Skewing Values are invalid", L"Error", MB_ICONERROR | MB_OK);
-		}
-
-		return;
-	}
 	float fScalarX = WideStringToFloat(wstrTempX);
 	float fScalarY = WideStringToFloat(wstrTempY);
 	float fScalarZ = WideStringToFloat(wstrTempZ);
 
-	// Create a Blank Matrices
-	vector<vector<float>*>* pMatrix = CreateZeroMatrix(4);
+	// Create a skewing matrix starting with an identity Matrix
+	vector<vector<float>*>* pSkewMatrix = CreateZeroMatrix(4);
+	MakeIdentity( pSkewMatrix);
 
-	if( RetrieveMatrix( _hDlg, _kcMatrixChar, pMatrix))
+	for( int iRow = 0; iRow < 4; iRow++)
 	{
-		// Create a skewing matrix starting with an identity Matrix
-		vector<vector<float>*>* pSkewMatrix = CreateZeroMatrix(4);
-		MakeIdentity( pSkewMatrix);
-
-		for( int iRow = 0; iRow < 4; iRow++)
+		for( int iColumn = 0; iColumn < 4; iColumn++)
 		{
-			for( int iColumn = 0; iColumn < 4; iColumn++)
+			if( iRow == iColumn)
 			{
-				if( iRow == iColumn)
+				if( iRow == 0)
 				{
-					if( iRow == 0)
-					{
-						(*(*pSkewMatrix)[iRow])[iColumn] = fScalarX;
-					}
-					else if( iRow == 1)
-					{
-						(*(*pSkewMatrix)[iRow])[iColumn] = fScalarY;
-					}
-					else if( iRow == 2)
-					{
-						(*(*pSkewMatrix)[iRow])[iColumn] = fScalarZ;
-					}
-					else
-					{
-						continue;
-					}
+					(*(*pSkewMatrix)[iRow])[iColumn] = fScalarX;
+				}
+				else if( iRow == 1)
+				{
+					(*(*pSkewMatrix)[iRow])[iColumn] = fScalarY;
+				}
+				else if( iRow == 2)
+				{
+					(*(*pSkewMatrix)[iRow])[iColumn] = fScalarZ;
 				}
 				else
 				{
-					// Set all other values to zero
-					(*(*pSkewMatrix)[iRow])[iColumn] = 0;
+					continue;
 				}
 			}
+			else
+			{
+				// Set all other values to zero
+				(*(*pSkewMatrix)[iRow])[iColumn] = 0;
+			}
 		}
-
-		// Transpose into Row Major
-		if( _kcMatrixChar == 'r')
-		{
-			Transpose(pSkewMatrix);
-		}
-
-		SetMatrix( _hDlg, _kcMatrixChar, pSkewMatrix);
-
-		// Delete Allocated Matrix memory
-		DeleteMatrix(pSkewMatrix);
 	}
 
-	// Delete Allocated Matrix memory
-	DeleteMatrix(pMatrix);
+	return pSkewMatrix;
+
+	//// Transpose into Row Major
+	//if( _kcMatrixChar == 'r')
+	//{
+	//	Transpose(pSkewMatrix);
+	//}
+
+	//SetMatrix( _hDlg, _kcMatrixChar, pSkewMatrix);
+
+	//// Delete Allocated Matrix memory
+	//DeleteMatrix(pSkewMatrix);
 }
 
 /***********************
@@ -237,9 +193,9 @@ void Skew( HWND _hDlg, const char _kcMatrixChar)
 * @author: Callan Moore
 * @parameter: _hDlg: Handle to the Dialog Box
 * @parameter: _kcMatrixChar: constant char that denotes the Matrix you want to translate
-* @return: void
+* @return: vector<vector<float>*>*: Pointer to the Translation Matrix
 ********************/
-void Translate( HWND _hDlg, const char _kcMatrixChar)
+vector<vector<float>*>* Translate( HWND _hDlg, const char _kcMatrixChar)
 {
 	// Get the Translation Values from the Dialog Box
 	wchar_t wstrTempX[100];
@@ -249,48 +205,30 @@ void Translate( HWND _hDlg, const char _kcMatrixChar)
 	GetDlgItemText( _hDlg, IDC_TRANSLATION_Y, wstrTempY, 100);
 	GetDlgItemText( _hDlg, IDC_TRANSLATION_Z, wstrTempZ, 100);
 
-	// Validate that the Matrix Translation values are floats
-	if(		!ValidateFloat( wstrTempX)
-		||	!ValidateFloat( wstrTempY)
-		||	!ValidateFloat( wstrTempZ) )
-	{
-		if( _kcMatrixChar == 'c')
-		{
-			MessageBox( _hDlg, L"ERROR - One or more of your Matrix translate values are invalid", L"Error", MB_ICONERROR | MB_OK);
-		}
-		return;
-	}
 	float fScalarX = WideStringToFloat(wstrTempX);
 	float fScalarY = WideStringToFloat(wstrTempY);
 	float fScalarZ = WideStringToFloat(wstrTempZ);
 
-	// Create a Blank Matrices
-	vector<vector<float>*>* pMatrix = CreateZeroMatrix(4);
+	// Create a Translation matrix starting with an identity Matrix
+	vector<vector<float>*>* pTranslationMatrix = CreateZeroMatrix(4);
+	MakeIdentity( pTranslationMatrix);
 
-	if( RetrieveMatrix( _hDlg, _kcMatrixChar, pMatrix))
-	{
-		// Create a Translation matrix starting with an identity Matrix
-		vector<vector<float>*>* pTranslationMatrix = CreateZeroMatrix(4);
-		MakeIdentity( pTranslationMatrix);
+	(*(*pTranslationMatrix)[0])[3] = fScalarX;
+	(*(*pTranslationMatrix)[1])[3] = fScalarY;
+	(*(*pTranslationMatrix)[2])[3] = fScalarZ;
 
-		(*(*pTranslationMatrix)[0])[3] = fScalarX;
-		(*(*pTranslationMatrix)[1])[3] = fScalarY;
-		(*(*pTranslationMatrix)[2])[3] = fScalarZ;
+	return pTranslationMatrix;
 
-		// Transpose back into Row Major
-		if( _kcMatrixChar == 'r')
-		{
-			Transpose(pTranslationMatrix);
-		}
+	//// Transpose back into Row Major
+	//if( _kcMatrixChar == 'r')
+	//{
+	//	Transpose(pTranslationMatrix);
+	//}
 
-		SetMatrix( _hDlg, _kcMatrixChar, pTranslationMatrix);
+	//SetMatrix( _hDlg, _kcMatrixChar, pTranslationMatrix);
 
-		// Delete Allocated Matrix memory
-		DeleteMatrix(pTranslationMatrix);
-	}
-
-	// Delete Allocated Matrix memory
-	DeleteMatrix(pMatrix);
+	//// Delete Allocated Matrix memory
+	//DeleteMatrix(pTranslationMatrix);
 }
 
 /***********************
@@ -299,9 +237,9 @@ void Translate( HWND _hDlg, const char _kcMatrixChar)
 * @parameter: _hDlg: Handle to the Dialog Box
 * @parameter: _kcMatrixChar: constant char that denotes the Matrix you want to Rotate
 * @parameter: _iAxis: The axis of rotation
-* @return: void
+* @return: vector<vector<float>*>*: Pointer to the Rotation Matrix
 ********************/
-void Rotate( HWND _hDlg, const char _kcMatrixChar, int _iAxis)
+vector<vector<float>*>* Rotate( HWND _hDlg, const char _kcMatrixChar, int _iAxis)
 {
 	float fPI = atan(1.0f)*4;
 
@@ -309,69 +247,109 @@ void Rotate( HWND _hDlg, const char _kcMatrixChar, int _iAxis)
 	wchar_t wstrTemp[100];
 	GetDlgItemText( _hDlg, IDC_ROTATION_ANGLE, wstrTemp, 100);
 
-	if(	!ValidateFloat( wstrTemp))
-	{
-		MessageBox( _hDlg, L"ERROR - Your Angle of Rotation is invalid", L"Error", MB_ICONERROR | MB_OK);
-		return;
-	}
 	// Take the angle in degrees and convert to radians
 	float fAngle = WideStringToFloat(wstrTemp) * ( fPI / 180);
 
-	// Create a Blank Matrices
-	vector<vector<float>*>* pMatrix = CreateZeroMatrix(4);
+	// Create a Rotation matrix starting with an identity Matrix
+	vector<vector<float>*>* pRotationMatrix = CreateZeroMatrix(4);
+	MakeIdentity( pRotationMatrix);
 
-	if( RetrieveMatrix( _hDlg, _kcMatrixChar, pMatrix))
+	switch( _iAxis)
 	{
-		// Create a Translation matrix starting with an identity Matrix
-		vector<vector<float>*>* pRotationMatrix = CreateZeroMatrix(4);
-		MakeIdentity( pRotationMatrix);
-
-		switch( _iAxis)
+	case (IDC_ROTATION_X):
 		{
-		case (IDC_ROTATION_X):
-			{
-				// Rotate around the X axis
-				(*(*pRotationMatrix)[1])[1] = static_cast<float>(floor( cos(fAngle) * 1000.0f + 0.5) / 1000);
-				(*(*pRotationMatrix)[1])[2] = static_cast<float>(floor( sin(fAngle) * 1000.0f + 0.5) / 1000);
-				(*(*pRotationMatrix)[2])[1] = static_cast<float>(floor( ((-1) * sin(fAngle)) * 1000.0f + 0.5) / 1000);
-				(*(*pRotationMatrix)[2])[2] = static_cast<float>(floor( cos(fAngle) * 1000.0f + 0.5) / 1000);
-			}
-			break;
-		case (IDC_ROTATION_Y):
-			{
-				// Rotate around the Y axis
-				(*(*pRotationMatrix)[0])[0] = static_cast<float>(floor( cos(fAngle) * 1000.0f + 0.5) / 1000);
-				(*(*pRotationMatrix)[0])[2] = static_cast<float>(floor( ((-1) * sin(fAngle)) * 1000.0f + 0.5) / 1000);
-				(*(*pRotationMatrix)[2])[0] = static_cast<float>(floor( sin(fAngle) * 1000.0f + 0.5) / 1000);
-				(*(*pRotationMatrix)[2])[2] = static_cast<float>(floor( cos(fAngle) * 1000.0f + 0.5) / 1000);
-			}
-			break;
-		case (IDC_ROTATION_Z):
-			{
-				// Rotate around the Z axis
-				(*(*pRotationMatrix)[0])[0] = static_cast<float>(floor( cos(fAngle) * 1000.0f + 0.5) / 1000);
-				(*(*pRotationMatrix)[0])[1] = static_cast<float>(floor( sin(fAngle) * 1000.0f + 0.5) / 1000);
-				(*(*pRotationMatrix)[1])[0] = static_cast<float>(floor( ((-1) * sin(fAngle)) * 1000.0f + 0.5) / 1000);
-				(*(*pRotationMatrix)[1])[1] = static_cast<float>(floor( cos(fAngle) * 1000.0f + 0.5) / 1000);
-			}
-			break;
-		default: break;
-		}	// End Switch
-
-		// Transpose back into Row Major
-		if( _kcMatrixChar == 'r')
-		{
-			Transpose(pRotationMatrix);
+			// Rotate around the X axis
+			(*(*pRotationMatrix)[1])[1] = static_cast<float>(floor( cos(fAngle) * 1000.0f + 0.5) / 1000);
+			(*(*pRotationMatrix)[1])[2] = static_cast<float>(floor( sin(fAngle) * 1000.0f + 0.5) / 1000);
+			(*(*pRotationMatrix)[2])[1] = static_cast<float>(floor( ((-1) * sin(fAngle)) * 1000.0f + 0.5) / 1000);
+			(*(*pRotationMatrix)[2])[2] = static_cast<float>(floor( cos(fAngle) * 1000.0f + 0.5) / 1000);
 		}
+		break;
+	case (IDC_ROTATION_Y):
+		{
+			// Rotate around the Y axis
+			(*(*pRotationMatrix)[0])[0] = static_cast<float>(floor( cos(fAngle) * 1000.0f + 0.5) / 1000);
+			(*(*pRotationMatrix)[0])[2] = static_cast<float>(floor( ((-1) * sin(fAngle)) * 1000.0f + 0.5) / 1000);
+			(*(*pRotationMatrix)[2])[0] = static_cast<float>(floor( sin(fAngle) * 1000.0f + 0.5) / 1000);
+			(*(*pRotationMatrix)[2])[2] = static_cast<float>(floor( cos(fAngle) * 1000.0f + 0.5) / 1000);
+		}
+		break;
+	case (IDC_ROTATION_Z):
+		{
+			// Rotate around the Z axis
+			(*(*pRotationMatrix)[0])[0] = static_cast<float>(floor( cos(fAngle) * 1000.0f + 0.5) / 1000);
+			(*(*pRotationMatrix)[0])[1] = static_cast<float>(floor( sin(fAngle) * 1000.0f + 0.5) / 1000);
+			(*(*pRotationMatrix)[1])[0] = static_cast<float>(floor( ((-1) * sin(fAngle)) * 1000.0f + 0.5) / 1000);
+			(*(*pRotationMatrix)[1])[1] = static_cast<float>(floor( cos(fAngle) * 1000.0f + 0.5) / 1000);
+		}
+		break;
+	default: break;
+	}	// End Switch
 
-		SetMatrix( _hDlg, _kcMatrixChar, pRotationMatrix);
+	return pRotationMatrix;
+ 
+	//// Transpose back into Row Major
+	//if( _kcMatrixChar == 'r')
+	//{
+	//	Transpose(pRotationMatrix);
+	//}
 
-		// Delete Allocated Matrix memory
-		DeleteMatrix(pRotationMatrix);
-	}
+	//SetMatrix( _hDlg, _kcMatrixChar, pRotationMatrix);
 
 	// Delete Allocated Matrix memory
-	DeleteMatrix(pMatrix);
+	//DeleteMatrix(pRotationMatrix);
+}
+
+/***********************
+* Project: Project the Matrix
+* @author: Callan Moore
+* @parameter: _hDlg: Handle to the Dialog Box
+* @parameter: _kcMatrixChar: constant char that denotes the Matrix you want to calculate the projection of
+* @parameter: _iAxis: The axis to project from
+* @return: vector<vector<float>*>*: Pointer to the Projection Matrix
+********************/
+vector<vector<float>*>* Project( HWND _hDlg, const char _kcMatrixChar, int _iAxis)
+{
+	// Retrieve the Distance
+	wchar_t wstrTemp[100];
+	GetDlgItemText( _hDlg, IDC_PROJECTION_DISTANCE, wstrTemp, 100);
+
+	// Take the angle in degrees and convert to radians
+	float fDistance = WideStringToFloat(wstrTemp);
+
+	// Create a Projection matrix starting with an identity Matrix
+	vector<vector<float>*>* pProjectionMatrix = CreateZeroMatrix(4);
+	MakeIdentity( pProjectionMatrix);
+
+	// Remove the W component
+	(*(*pProjectionMatrix)[3])[3] = 0;
+
+	switch( _iAxis)
+	{
+	case (IDC_PROJECTION_X):
+		{
+			// Add in the projection distance into the X axis
+			(*(*pProjectionMatrix)[3])[0] = (1 / fDistance);
+		}
+		break;
+	case (IDC_PROJECTION_Y):
+		{
+			// Add in the projection distance into the X axis
+			(*(*pProjectionMatrix)[3])[1] = (1 / fDistance);
+		}
+		break;
+	case (IDC_PROJECTION_Z):
+		{
+			// Add in the projection distance into the X axis
+			(*(*pProjectionMatrix)[3])[2] = (1 / fDistance);
+		}
+		break;
+	default: break;
+	}	// End Switch
+
+	//SetMatrix( _hDlg, 'c', pProjectionMatrix);
+
+	return pProjectionMatrix;
 }
 
 /***********************

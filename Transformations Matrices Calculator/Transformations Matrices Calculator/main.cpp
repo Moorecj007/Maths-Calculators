@@ -72,46 +72,140 @@ BOOL CALLBACK DlgProc(HWND _hDlg, UINT _msg, WPARAM _wparam, LPARAM _lparam)
 		{
 			// Getting index of combo selection
 			HWND hComboBox = GetDlgItem( _hDlg, IDC_COMBO_SELECTION);
+			HWND hListBox = GetDlgItem( _hDlg, IDC_LISTBOX);
 			int iComboIndex = SendMessage( hComboBox, CB_GETCURSEL, 0, 0);
+			
 
 			switch(LOWORD( _wparam))
 			{
-			case (IDC_COMPUTE):				// Compute button to trigger the calculation specified in the drop down combo box
+			case (IDC_COMPUTE):			// Compute button to trigger the calculation specified in the drop down combo box
 				{
-					switch( iComboIndex)
+					// Checks if the list box is empty and displays identity matrices if so
+					int iInitialListCount = SendMessage( hListBox, LB_GETCOUNT, 0, 0);
+
+					if( iInitialListCount == 0)
 					{
-					case (0):
+						vector<vector<float>*>* pIdentity = CreateZeroMatrix(4);
+						MakeIdentity( pIdentity);
+
+						SetMatrix( _hDlg, 'c', pIdentity);
+						SetMatrix( _hDlg, 'r', pIdentity);
+
+						DeleteMatrix( pIdentity);
+					}
+					else
+					{
+						// while the list still as items in it
+						while( iInitialListCount > 0)
 						{
-							//Project(_hDlg, 'c', g_iRadioProjection);
-							//Project(_hDlg, 'r', g_iRadioProjection);
+
 						}
-						break;
-					case (1):
-						{
-							Rotate(_hDlg, 'c', g_iRadioRotation);
-							Rotate(_hDlg, 'r', g_iRadioRotation);
-						}
-						break;
-					case (2):
-						{
-							Scale(_hDlg, 'c');
-							Scale(_hDlg, 'r');
-						}
-						break;
-					case (3):
-						{
-							Skew(_hDlg, 'c');
-							Skew(_hDlg, 'r');
-						}
-						break;
-					case (4):
-						{
-							Translate(_hDlg, 'c');
-							Translate(_hDlg, 'r');
-						}
-						break;
-					default: break;
-					}	// End Switch	
+					}
+
+					//switch( iComboIndex)
+					//{
+					//case (0):
+					//	{
+					//		// Retrieve the Distance
+					//		wchar_t wstrTemp[100];
+					//		GetDlgItemText( _hDlg, IDC_PROJECTION_DISTANCE, wstrTemp, 100);
+
+					//		if(	ValidateFloat( wstrTemp))
+					//		{
+					//			Project(_hDlg, 'c', g_iRadioProjection);
+					//			Project(_hDlg, 'r', g_iRadioProjection);
+					//		}
+					//		else
+					//		{
+					//			MessageBox( _hDlg, L"ERROR - Your Projection Distance is invalid", L"Error", MB_ICONERROR | MB_OK);
+					//		}
+					//	}
+					//	break;
+					//case (1):
+					//	{
+					//		// Retrieve the Angle of rotation
+					//		wchar_t wstrTemp[100];
+					//		GetDlgItemText( _hDlg, IDC_ROTATION_ANGLE, wstrTemp, 100);
+
+					//		if(	ValidateFloat( wstrTemp))
+					//		{
+					//			Rotate(_hDlg, 'c', g_iRadioRotation);
+					//			Rotate(_hDlg, 'r', g_iRadioRotation);
+					//		}
+					//		else
+					//		{
+					//			MessageBox( _hDlg, L"ERROR - Your Angle of Rotation is invalid", L"Error", MB_ICONERROR | MB_OK);
+					//		}
+					//	}
+					//	break;
+					//case (2):
+					//	{
+					//		// Get the Scalar Values from the Dialog Box
+					//		wchar_t wstrTemp[100];
+					//		GetDlgItemText( _hDlg, IDC_SCALE, wstrTemp, 100);
+
+					//		// Validate that the Matrix scalars are floats
+					//		if(		ValidateFloat( wstrTemp) )
+					//		{
+					//			Scale(_hDlg, 'c');
+					//			Scale(_hDlg, 'r');
+					//		}
+					//		else
+					//		{
+					//			MessageBox( _hDlg, L"ERROR - Matrix Scalars are invalid", L"Error", MB_ICONERROR | MB_OK);
+					//		}
+					//	}
+					//	break;
+					//case (3):
+					//	{
+					//		// Get the Skewing Values from the Dialog Box
+					//		wchar_t wstrTempX[100];
+					//		wchar_t wstrTempY[100];
+					//		wchar_t wstrTempZ[100];
+					//		GetDlgItemText( _hDlg, IDC_SKEW_X, wstrTempX, 100);
+					//		GetDlgItemText( _hDlg, IDC_SKEW_Y, wstrTempY, 100);
+					//		GetDlgItemText( _hDlg, IDC_SKEW_Z, wstrTempZ, 100);
+
+					//		// Validate that the Matrix Skew variables are floats
+					//		if(		ValidateFloat( wstrTempX)
+					//			&&	ValidateFloat( wstrTempY)
+					//			&&	ValidateFloat( wstrTempZ) )
+					//		{
+					//			Skew(_hDlg, 'c');
+					//			Skew(_hDlg, 'r');	
+					//		}
+					//		else
+					//		{
+					//			MessageBox( _hDlg, L"ERROR - One or more of your Matrix Skewing Values are invalid", L"Error", MB_ICONERROR | MB_OK);
+					//		}
+					//	}
+					//	break;
+					//case (4):
+					//	{
+					//		// Get the Translation Values from the Dialog Box
+					//		wchar_t wstrTempX[100];
+					//		wchar_t wstrTempY[100];
+					//		wchar_t wstrTempZ[100];
+					//		GetDlgItemText( _hDlg, IDC_TRANSLATION_X, wstrTempX, 100);
+					//		GetDlgItemText( _hDlg, IDC_TRANSLATION_Y, wstrTempY, 100);
+					//		GetDlgItemText( _hDlg, IDC_TRANSLATION_Z, wstrTempZ, 100);
+
+					//		// Validate that the Matrix Translation values are floats
+					//		if(		ValidateFloat( wstrTempX)
+					//			&&	ValidateFloat( wstrTempY)
+					//			&&	ValidateFloat( wstrTempZ) )
+					//		{
+					//			Translate(_hDlg, 'c');
+					//			Translate(_hDlg, 'r');
+					//		}
+					//		else
+					//		{
+					//			MessageBox( _hDlg, L"ERROR - One or more of your Matrix translate values are invalid", L"Error", MB_ICONERROR | MB_OK);
+					//		}
+					//	}
+					//	break;
+					//default: break;
+					//}	// End Switch	
 
 					// No Transformation was selected
 					if( iComboIndex == (-1))
@@ -139,6 +233,19 @@ BOOL CALLBACK DlgProc(HWND _hDlg, UINT _msg, WPARAM _wparam, LPARAM _lparam)
 			case (IDC_RESET):				// Reset Button to reset the calculator back to default starting values
 				{
 					InitialSetup(_hDlg);
+				}
+				break;
+			case (IDC_COMBO_SELECTION):
+				{
+					if( HIWORD(_wparam) == CBN_SELENDOK)
+					{
+						wchar_t wstrTemp[100];
+						HWND hComboBox = GetDlgItem( _hDlg, IDC_COMBO_SELECTION);
+						HWND hListBox = GetDlgItem( _hDlg, IDC_LISTBOX);
+						SendMessage(hComboBox, WM_GETTEXT, 100, LPARAM(wstrTemp));
+
+						SendMessage(hListBox, LB_ADDSTRING, 100, LPARAM(wstrTemp));
+					}
 				}
 				break;
 			
