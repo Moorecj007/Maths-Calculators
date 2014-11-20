@@ -75,30 +75,30 @@ BOOL CALLBACK DlgProc(HWND _hDlg, UINT _msg, WPARAM _wparam, LPARAM _lparam)
 			HWND hListBox = GetDlgItem( _hDlg, IDC_LISTBOX);
 			int iComboIndex = SendMessage( hComboBox, CB_GETCURSEL, 0, 0);
 			
-
 			switch(LOWORD( _wparam))
 			{
 			case (IDC_COMPUTE):			// Compute button to trigger the calculation specified in the drop down combo box
 				{
+					wchar_t wstrSelection;
+					int iListCount = SendMessage( hListBox, LB_GETCOUNT, 0, 0);
+
 					// Checks if the list box is empty and displays identity matrices if so
-					int iInitialListCount = SendMessage( hListBox, LB_GETCOUNT, 0, 0);
-
-					if( iInitialListCount == 0)
+					if( iListCount == 0)
 					{
-						vector<vector<float>*>* pIdentity = CreateZeroMatrix(4);
-						MakeIdentity( pIdentity);
+						vector<vector<float>*>* pResultMatrix = CreateZeroMatrix(4);
+						MakeIdentity( pResultMatrix);
 
-						SetMatrix( _hDlg, 'c', pIdentity);
-						SetMatrix( _hDlg, 'r', pIdentity);
+						SetMatrix( _hDlg, 'c', pResultMatrix);
+						SetMatrix( _hDlg, 'r', pResultMatrix);
 
-						DeleteMatrix( pIdentity);
+						DeleteMatrix( pResultMatrix);
 					}
 					else
 					{
 						// while the list still as items in it
-						while( iInitialListCount > 0)
+						while( iListCount > 0)
 						{
-
+							wstrSelection = (SendMessageW( _hDlg, LB_GETTEXT, (iListCount - 1), 0));
 						}
 					}
 
