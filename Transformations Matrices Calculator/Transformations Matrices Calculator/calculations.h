@@ -40,7 +40,7 @@ vector<vector<float>*>* Rotate( HWND _hDlg, const char _kcMatrixChar, int _iAxis
 vector<vector<float>*>* Project( HWND _hDlg, const char _kcMatrixChar, int _iAxis);
 
 void MakeIdentity( vector<vector<float>*>* _pMatrix);
-vector<vector<float>*>* Multiply( vector<vector<float>*>* pMatrix1, vector<vector<float>*>* pMatrix2);
+void Multiply( vector<vector<float>*>* pMatrix1, vector<vector<float>*>* pMatrix2);
 void Transpose( vector<vector<float>*>* _pMatrix);
 bool RetrieveMatrix( HWND _hDlg, const char _kcMatrixChar, vector<vector<float>*>* _pfMatrix);
 void SetMatrix( HWND _hDlg, const char _kcMatrixChar, vector<vector<float>*>* _pfMatrix);

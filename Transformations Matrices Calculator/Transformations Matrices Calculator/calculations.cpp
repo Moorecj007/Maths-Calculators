@@ -44,6 +44,7 @@ void InitialSetup(HWND _hDlg)
 	SetMatrix( _hDlg, 'c', pZeroMatrix);
 
 	// Set the input Trasfomation boxes to 0
+	SetDlgItemTextA( _hDlg, IDC_SCALE ,strDefault.c_str()); 
 	SetDlgItemTextA( _hDlg, IDC_SKEW_X ,strDefault.c_str()); 
 	SetDlgItemTextA( _hDlg, IDC_SKEW_Y ,strDefault.c_str()); 
 	SetDlgItemTextA( _hDlg, IDC_SKEW_Z ,strDefault.c_str()); 
@@ -52,9 +53,6 @@ void InitialSetup(HWND _hDlg)
 	SetDlgItemTextA( _hDlg, IDC_TRANSLATION_Z ,strDefault.c_str());  
 	SetDlgItemTextA( _hDlg, IDC_ROTATION_ANGLE ,strDefault.c_str()); 
 	SetDlgItemTextA( _hDlg, IDC_PROJECTION_DISTANCE ,strDefault.c_str()); 
-
-	// Set up the Radio Button Selections
-
 
 	// Delete allocated memory in Matrix
 	DeleteMatrix(pZeroMatrix);
@@ -382,9 +380,9 @@ void MakeIdentity( vector<vector<float>*>* _pMatrix)
 * @author: Callan Moore
 * @parameter: pMatrix1: Left Matrix for the multiplication
 * @parameter: pMatrix2: Right Matrix for the multiplication
-* @return: vector<vector<float>*>*: Pointer to the Resultant Matrix
+* @return: void
 ********************/
-vector<vector<float>*>* Multiply( vector<vector<float>*>* pMatrix1, vector<vector<float>*>* pMatrix2)
+void Multiply( vector<vector<float>*>* pMatrix1, vector<vector<float>*>* pMatrix2)
 {
 	// Create Blank Matrix for the result
 	vector<vector<float>*>* pMatrixResult = CreateZeroMatrix(4);
@@ -409,8 +407,17 @@ vector<vector<float>*>* Multiply( vector<vector<float>*>* pMatrix1, vector<vecto
 		}
 	}
 
+	for( int iRow = 0; iRow < 4; iRow++)
+	{
+		for( int iColumn = 0; iColumn < 4; iColumn++)
+		{
+			(*(*pMatrix1)[iRow])[iColumn] = (*(*pMatrixResult)[iRow])[iColumn];
+		}
+	}
+
 	// Delete the allocated memory for the matrices
-	return (pMatrixResult);
+	DeleteMatrix(pMatrixResult);
+	//return (pMatrixResult);
 }
 
 /***********************
